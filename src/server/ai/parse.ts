@@ -4,6 +4,7 @@ import { zodTextFormat } from "openai/helpers/zod";
 import { env } from "@/src/server/env";
 import { ParsedMenuSchema, type ParsedMenu } from "@/src/schemas/menu";
 import { menuLimits } from "@/src/config/constants";
+import { normalizeDishName } from "@/src/lib/normalize";
 import { UpstreamError } from "@/src/server/errors";
 
 const client = new OpenAI({
@@ -12,48 +13,41 @@ const client = new OpenAI({
   maxRetries: 1,
 });
 
-const PARSE_MODEL = "gpt-5-mini";
+const PARSE_MODEL = "gpt-5.6-luna";
 
-const buildPrompt = (targetLang: string): string =>
-  [
-    "You read a photo of a restaurant menu and return structured data.",
-    `Target language for translations: ${targetLang} (BCP-47).`,
-    "Rules:",
-    "- isMenu: false if the photo is not a food or drink menu; then return an empty dishes array.",
-    "- originalName: exactly as printed, in the original script.",
-    '- translatedName: natural translation. Famous dishes keep their transliterated name plus a short gloss (e.g. "Tom Yum Goong — spicy shrimp soup").',
-    "- description: one short sentence in the target language; write a helpful one if the menu has none.",
-    "- price: exactly as printed including currency symbol, or null if the line has no price.",
-    "- detectedLanguage: BCP-47 tag of the menu's own language. detectedCurrency: ISO 4217 code or null.",
-    "- tags: only when reasonably confident from the dish itself.",
-    "- spiceLevel: integer 0–3. calories: rough kcal for a typical serving, null if you cannot estimate.",
-    "- romanization: Latin transliteration when originalName is in a non-Latin script, else null.",
-    '- confidence: "low" for blurry or uncertain lines — include them anyway.',
-    `- At most ${menuLimits.maxDishes} dishes.`,
-  ].join("\n");
+const PROMPT = [
+  "You read a photo of a restaurant menu and list its dishes.",
+  "Rules:",
+  "- isMenu: false if the photo is not a food or drink menu; then return an empty dishes array.",
+  '- name: the dish\'s most common English name (e.g. "Tom Yum Goong", "Margherita Pizza").',
+  "  Use the widely known transliterated name when one exists; otherwise a short plain-English name.",
+  "- One entry per distinct dish on the menu. No duplicates, no section headers, no prices.",
+  `- At most ${menuLimits.maxDishes} dishes.`,
+].join("\n");
 
-// Clamps ranges the structured-output schema can't express (no min/max in strict mode).
-const sanitize = (menu: ParsedMenu): ParsedMenu => ({
-  ...menu,
-  dishes: menu.dishes
-    .filter((dish) => dish.originalName.trim().length > 0)
-    .slice(0, menuLimits.maxDishes)
-    .map((dish) => ({
-      ...dish,
-      spiceLevel: Math.min(3, Math.max(0, Math.round(dish.spiceLevel))),
-      calories:
-        dish.calories !== null && dish.calories > 0
-          ? Math.round(dish.calories)
-          : null,
-    })),
-});
+// Dedupe by normalized name and enforce the cap the schema can't express.
+const sanitize = (menu: ParsedMenu): ParsedMenu => {
+  const seen = new Set<string>();
+  const dishes = [];
+  for (const dish of menu.dishes) {
+    const name = dish.name.trim();
+    const key = normalizeDishName(name);
+    if (!key || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    dishes.push({ name });
+    if (dishes.length >= menuLimits.maxDishes) {
+      break;
+    }
+  }
+  return { isMenu: menu.isMenu, dishes };
+};
 
 const parseMenuPhoto = async ({
   jpegBytes,
-  targetLang,
 }: {
   jpegBytes: Uint8Array;
-  targetLang: string;
 }): Promise<ParsedMenu> => {
   const imageUrl = `data:image/jpeg;base64,${Buffer.from(jpegBytes).toString("base64")}`;
   let response;
@@ -65,7 +59,7 @@ const parseMenuPhoto = async ({
         {
           role: "user",
           content: [
-            { type: "input_text", text: buildPrompt(targetLang) },
+            { type: "input_text", text: PROMPT },
             { type: "input_image", image_url: imageUrl, detail: "high" },
           ],
         },

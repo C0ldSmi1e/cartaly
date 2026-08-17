@@ -2,6 +2,12 @@
 
 Photograph a restaurant menu → translated dish names, prices, and a generated photo of every dish. Lives at cartaly.app.
 
+> **Current build scope (2026-08-17):** simplified contract — photo in →
+> English dish name + one image per dish (1:1). Dish identity =
+> `sha256(normalize(englishName))`. Everything else below (prices, targetLang,
+> tags, calories, romanization…) is deferred; see
+> [implementation-plan.md](./implementation-plan.md).
+
 Design rules:
 
 1. Text renders before images (~2–3 s). Images stream in after.

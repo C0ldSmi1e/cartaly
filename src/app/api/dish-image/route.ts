@@ -9,8 +9,7 @@ import { enforceRateLimit, getClientIp } from "@/src/server/rate-limit";
 import { BadRequestError } from "@/src/server/errors";
 
 const bodySchema = z.object({
-  originalName: z.string().min(1).max(300),
-  description: z.string().max(500).nullable().optional(),
+  name: z.string().min(1).max(300),
 });
 
 const POST = async (request: NextRequest) => {
@@ -19,13 +18,10 @@ const POST = async (request: NextRequest) => {
 
     const body = bodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) {
-      throw new BadRequestError("Expected { originalName, description? }");
+      throw new BadRequestError("Expected { name }");
     }
 
-    const result = await getDishImage({
-      originalName: body.data.originalName,
-      description: body.data.description ?? null,
-    });
+    const result = await getDishImage({ name: body.data.name });
     return NextResponse.json(createSuccessResponse({ data: result }), {
       status: 200,
     });

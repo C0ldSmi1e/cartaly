@@ -42,6 +42,14 @@ Status: backend done. Bake-off measured low ≈ 17 s / medium ≈ 49 s per image
 low is the latency pick pending visual review. Blob layer runs on local disk
 until R2 creds land in .env (config-only swap).
 
+## Contract simplification (2026-08-17)
+
+Current build scope: **photo in → English dish names + one image each (1:1)**.
+The parse call only identifies dishes by their most common English name; the
+dish identity (image cache key) is `sha256(normalize(englishName))`. Deferred
+for later steps: prices, translations/targetLang, tags, spice, calories,
+romanization, descriptions, currency. Two-endpoint lazy flow unchanged.
+
 ## Phase 3 — Menu UX
 
 - Filters (vegetarian / vegan / gluten-free / spicy), search across both

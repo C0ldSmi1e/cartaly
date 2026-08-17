@@ -12,13 +12,11 @@ import { AuthorizationError } from "@/src/server/errors";
 type DishImageResult = { url: string; cached: boolean };
 
 const getDishImage = async ({
-  originalName,
-  description,
+  name,
 }: {
-  originalName: string;
-  description: string | null;
+  name: string;
 }): Promise<DishImageResult> => {
-  const nameHash = dishNameHash(originalName);
+  const nameHash = dishNameHash(name);
   const dish = db.select().from(dishes).where(eq(dishes.nameHash, nameHash)).get();
   // Row existence proves the name came from a real parsed menu.
   if (!dish) {
@@ -35,10 +33,7 @@ const getDishImage = async ({
   }
 
   assertSpendBudget("imageLow");
-  const webp = await generateDishImage({
-    originalName: dish.originalName,
-    description,
-  });
+  const webp = await generateDishImage({ name: dish.name });
   recordSpend("imageLow");
 
   const imageKey = `${imageCacheVersion}/dish/${nameHash}.webp`;

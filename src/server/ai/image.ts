@@ -12,33 +12,23 @@ const client = new OpenAI({
 
 const IMAGE_MODEL = "gpt-image-2";
 
-const buildImagePrompt = (
-  originalName: string,
-  description: string | null,
-): string =>
-  [
-    `Overhead photo of a single serving of "${originalName}"`,
-    description ? `(${description})` : "",
-    "on a simple ceramic plate, soft natural light, realistic everyday",
-    "restaurant presentation — appetizing but honest, not glamorized. No text.",
-  ]
-    .filter(Boolean)
-    .join(" ");
+const buildImagePrompt = (name: string): string =>
+  `Overhead photo of a single serving of "${name}" on a simple ceramic plate, ` +
+  "soft natural light, realistic everyday restaurant presentation — appetizing " +
+  "but honest, not glamorized. No text.";
 
 const generateDishImage = async ({
-  originalName,
-  description,
+  name,
   quality = "low",
 }: {
-  originalName: string;
-  description: string | null;
+  name: string;
   quality?: "low" | "medium";
 }): Promise<Buffer> => {
   let b64: string | undefined;
   try {
     const response = await client.images.generate({
       model: IMAGE_MODEL,
-      prompt: buildImagePrompt(originalName, description),
+      prompt: buildImagePrompt(name),
       size: "1024x1024",
       quality,
     });

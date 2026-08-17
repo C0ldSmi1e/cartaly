@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartaly — API test</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", sans-serif; background: #f4f1ec; color: #241f1b; max-width: 860px; margin: 0 auto; padding: 32px 20px; line-height: 1.5; }
+  h1 { font-size: 22px; } h1 span { color: #d15c31; }
+  .step { background: #fff; border: 1px solid #e5ddd2; border-radius: 14px; padding: 18px; margin-top: 18px; }
+  .step h2 { font-size: 15px; margin: 0 0 12px; }
+  #drop { border: 2px dashed #e5ddd2; border-radius: 10px; padding: 24px; text-align: center; color: #7d756b; cursor: pointer; }
+  #drop.has { border-style: solid; }
+  #preview { max-width: 220px; max-height: 220px; border-radius: 8px; display: none; margin: 10px auto 0; }
+  button { background: #d15c31; color: #fff; border: 0; border-radius: 99px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 14px; }
+  button:disabled { opacity: .45; cursor: default; }
+  .meta { font-size: 12.5px; color: #7d756b; margin-top: 10px; }
+  .err { color: #b3261e; font-size: 13.5px; margin-top: 10px; white-space: pre-wrap; }
+  ol { margin: 10px 0 0; padding-left: 22px; font-size: 14px; }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 14px; }
+  .card { border: 1px solid #e5ddd2; border-radius: 10px; padding: 8px; font-size: 12.5px; text-align: center; }
+  .card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; background: #efe9e0; }
+  .card .st { color: #7d756b; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Cart<span>aly</span> — API test</h1>
+
+<div class="step">
+  <h2>Step 1 — photo → English dish names</h2>
+  <div id="drop">Click to choose a menu photo, drag one here, or paste (⌘V)
+    <img id="preview" alt="">
+  </div>
+  <input id="file" type="file" accept="image/*" hidden>
+  <button id="parseBtn" disabled>Parse menu</button>
+  <div class="meta" id="parseMeta"></div>
+  <div class="err" id="parseErr"></div>
+  <ol id="names"></ol>
+</div>
+
+<div class="step">
+  <h2>Step 2 — names → images (max 4 in flight)</h2>
+  <button id="imagesBtn" disabled>Load images</button>
+  <div id="grid"></div>
+</div>
+
+<script>
+  let photo = null;
+  let dishes = [];
+  const $ = (id) => document.getElementById(id);
+
+  const setPhoto = (f) => {
+    if (!f || !f.type.startsWith("image/")) return;
+    photo = f;
+    $("preview").src = URL.createObjectURL(f);
+    $("preview").style.display = "block";
+    $("drop").classList.add("has");
+    $("parseBtn").disabled = false;
+  };
+
+  $("drop").onclick = () => $("file").click();
+  $("file").onchange = (e) => setPhoto(e.target.files[0]);
+  document.addEventListener("paste", (e) => {
+    const item = [...e.clipboardData.items].find((i) => i.type.startsWith("image/"));
+    if (item) setPhoto(item.getAsFile());
+  });
+  $("drop").ondragover = (e) => e.preventDefault();
+  $("drop").ondrop = (e) => { e.preventDefault(); setPhoto(e.dataTransfer.files[0]); };
+
+  $("parseBtn").onclick = async () => {
+    $("parseBtn").disabled = true;
+    $("parseErr").textContent = "";
+    $("names").innerHTML = "";
+    $("grid").innerHTML = "";
+    $("parseMeta").textContent = "Parsing…";
+    const form = new FormData();
+    form.append("photo", photo, "menu.jpg");
+    const t0 = performance.now();
+    try {
+      const res = await fetch("/api/parse-menu", { method: "POST", body: form });
+      const body = await res.json();
+      const ms = Math.round(performance.now() - t0);
+      if (!res.ok || body.error) {
+        $("parseMeta").textContent = "";
+        $("parseErr").textContent = `${res.status}: ${body.error ?? "unknown error"}`;
+        return;
+      }
+      dishes = body.data.menu.dishes.map((d) => d.name);
+      $("parseMeta").textContent =
+        `menuId ${body.data.menuId} · cached: ${body.data.cached} · ${ms} ms · ${dishes.length} dishes`;
+      for (const name of dishes) {
+        const li = document.createElement("li");
+        li.textContent = name;
+        $("names").appendChild(li);
+      }
+      $("imagesBtn").disabled = dishes.length === 0;
+    } catch (e) {
+      $("parseMeta").textContent = "";
+      $("parseErr").textContent = String(e);
+    } finally {
+      $("parseBtn").disabled = false;
+    }
+  };
+
+  const loadOne = async (card, name) => {
+    const st = card.querySelector(".st");
+    st.textContent = "generating…";
+    const t0 = performance.now();
+    try {
+      const res = await fetch("/api/dish-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const body = await res.json();
+      const ms = Math.round(performance.now() - t0);
+      if (!res.ok || body.error) {
+        st.textContent = `${res.status}: ${body.error ?? "error"} — click to retry`;
+        card.onclick = () => loadOne(card, name);
+        return;
+      }
+      card.querySelector("img").src = body.data.url;
+      st.textContent = `${body.data.cached ? "cached" : "generated"} · ${ms} ms`;
+      card.onclick = null;
+    } catch (e) {
+      st.textContent = `${e} — click to retry`;
+      card.onclick = () => loadOne(card, name);
+    }
+  };
+
+  $("imagesBtn").onclick = async () => {
+    $("imagesBtn").disabled = true;
+    $("grid").innerHTML = "";
+    const cards = dishes.map((name) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<img alt=""><div>${name}</div><div class="st">queued</div>`;
+      $("grid").appendChild(card);
+      return { card, name };
+    });
+    const queue = [...cards];
+    await Promise.all(
+      Array.from({ length: 4 }, async () => {
+        while (queue.length) {
+          const { card, name } = queue.shift();
+          await loadOne(card, name);
+        }
+      }),
+    );
+    $("imagesBtn").disabled = false;
+  };
+</script>
+</body>
+</html>
