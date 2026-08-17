@@ -10,7 +10,7 @@ const client = new OpenAI({
   maxRetries: 1,
 });
 
-const IMAGE_MODEL = "gpt-image-2";
+const IMAGE_MODEL = "gpt-image-1-mini";
 
 const buildImagePrompt = (name: string): string =>
   `Overhead photo of a single serving of "${name}" on a simple ceramic plate, ` +

@@ -4,14 +4,11 @@ import {
   errorToResponse,
 } from "@/src/server/create-response";
 import { parseMenu } from "@/src/server/actions/parse-menu";
-import { enforceRateLimit, getClientIp } from "@/src/server/rate-limit";
 import { menuLimits } from "@/src/config/constants";
 import { BadRequestError } from "@/src/server/errors";
 
 const POST = async (request: NextRequest) => {
   try {
-    enforceRateLimit({ scope: "parse", ip: getClientIp(request), limit: 5 });
-
     const form = await request.formData().catch(() => {
       throw new BadRequestError("Expected multipart form data with a photo");
     });
