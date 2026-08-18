@@ -46,9 +46,10 @@ until R2 creds land in .env (config-only swap).
 
 Current build scope: **photo in → English dish names + one image each (1:1)**.
 The parse call only identifies dishes by their most common English name; the
-dish identity (image cache key) is `sha256(normalize(englishName))`. Deferred
-for later steps: prices, translations/targetLang, tags, spice, calories,
-romanization, descriptions, currency. Two-endpoint lazy flow unchanged.
+dish identity (image cache key) is `sha256(normalize(englishName))`. Attributes
+return one step at a time: `originalName` + `calories` are back (2026-08-17).
+Still deferred: prices, translations/targetLang, tags, spice, romanization,
+descriptions, currency. Two-endpoint lazy flow unchanged.
 
 ## Phase 3 — Menu UX
 

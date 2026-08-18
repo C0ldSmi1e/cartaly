@@ -21,6 +21,7 @@ const PROMPT = [
   "- isMenu: false if the photo is not a food or drink menu; then return an empty dishes array.",
   '- name: the dish\'s most common English name (e.g. "Tom Yum Goong", "Margherita Pizza").',
   "  Use the widely known transliterated name when one exists; otherwise a short plain-English name.",
+  "- originalName: the dish name in its original language, exactly matching the text on the menu.",
   "- One entry per distinct dish on the menu. No duplicates, no section headers, no prices.",
   `- At most ${menuLimits.maxDishes} dishes.`,
 ].join("\n");
@@ -36,7 +37,7 @@ const sanitize = (menu: ParsedMenu): ParsedMenu => {
       continue;
     }
     seen.add(key);
-    dishes.push({ name });
+    dishes.push({ name, originalName: dish.originalName.trim() || name });
     if (dishes.length >= menuLimits.maxDishes) {
       break;
     }

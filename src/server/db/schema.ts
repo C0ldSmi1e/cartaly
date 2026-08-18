@@ -19,6 +19,7 @@ const dishes = sqliteTable("dishes", {
   nameHash: text("name_hash").primaryKey(), // sha256(normalize(englishName))
   name: text("name").notNull(), // English dish name
   imageKey: text("image_key"), // R2 key once generated; null = not yet
+  calories: integer("calories"), // typical-serving kcal; null = not computed yet
   hits: integer("hits").notNull().default(0),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

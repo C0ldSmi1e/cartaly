@@ -6,7 +6,7 @@ import { env } from "@/src/server/env";
 import { RateLimitError } from "@/src/server/errors";
 
 // Rough per-call costs in cents; the kill switch is a fuse, not accounting.
-const COST_CENTS = { parse: 1, imageLow: 1, imageMedium: 6 } as const;
+const COST_CENTS = { parse: 1, imageLow: 1, imageMedium: 6, info: 1 } as const;
 
 const spendKey = () => `spend:${new Date().toISOString().slice(0, 10)}`;
 
