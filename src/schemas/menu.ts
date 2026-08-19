@@ -23,6 +23,7 @@ const DishInfoResultSchema = z.object({
     z.object({
       name: z.string(),
       calories: z.number().nullable(),
+      description: z.string().nullable(),
     }),
   ),
 });

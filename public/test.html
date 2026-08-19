@@ -123,7 +123,10 @@
       }
       for (const d of body.data.dishes) {
         const li = document.querySelector(`li[data-name="${CSS.escape(d.name)}"]`);
-        if (li) li.querySelector(".kc").textContent = d.calories ? `· ~${d.calories} kcal` : "· kcal n/a";
+        if (li) {
+          const kcal = d.calories ? `~${d.calories} kcal` : "kcal n/a";
+          li.querySelector(".kc").textContent = `· ${kcal}${d.description ? ` — ${d.description}` : ""}`;
+        }
       }
       $("parseMeta").textContent += ` · info ${ms} ms`;
     } finally {

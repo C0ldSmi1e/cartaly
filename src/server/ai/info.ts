@@ -14,7 +14,7 @@ const client = new OpenAI({
 
 const INFO_MODEL = "gpt-5.6-luna";
 
-const CaloriesSchema = z.object({
+const DishFactsSchema = z.object({
   items: z.array(
     z.object({
       name: z.string().describe("The dish name, echoed exactly as given"),
@@ -22,14 +22,20 @@ const CaloriesSchema = z.object({
         .number()
         .nullable()
         .describe("kcal for one typical serving; null if unclear"),
+      description: z
+        .string()
+        .nullable()
+        .describe(
+          "One short plain-English sentence saying what the dish is; null if unclear",
+        ),
     }),
   ),
 });
 
+type DishFacts = { calories: number | null; description: string | null };
+
 // Text-only call — dish facts come from world knowledge, not the photo.
-const estimateCalories = async (
-  names: string[],
-): Promise<Map<string, number | null>> => {
+const enrichDishes = async (names: string[]): Promise<Map<string, DishFacts>> => {
   let response;
   try {
     response = await client.responses.parse({
@@ -42,14 +48,15 @@ const estimateCalories = async (
             {
               type: "input_text",
               text:
-                "For each dish name, estimate the calories of one typical serving. " +
-                "Echo each name exactly as given. Use null when you cannot estimate.\n" +
+                "For each dish name: estimate the calories of one typical serving, and " +
+                "write one short plain-English sentence saying what the dish is. " +
+                "Echo each name exactly as given. Use null when you cannot tell.\n" +
                 names.map((name) => `- ${name}`).join("\n"),
             },
           ],
         },
       ],
-      text: { format: zodTextFormat(CaloriesSchema, "dish_calories") },
+      text: { format: zodTextFormat(DishFactsSchema, "dish_facts") },
     });
   } catch (error) {
     console.error("dish-info OpenAI call failed:", error);
@@ -59,13 +66,18 @@ const estimateCalories = async (
     throw new UpstreamError("Dish info returned no result — please retry");
   }
 
-  const byKey = new Map<string, number | null>();
+  const byKey = new Map<string, DishFacts>();
   for (const item of response.output_parsed.items) {
-    const calories =
-      item.calories !== null && item.calories > 0 ? Math.round(item.calories) : null;
-    byKey.set(normalizeDishName(item.name), calories);
+    byKey.set(normalizeDishName(item.name), {
+      calories:
+        item.calories !== null && item.calories > 0
+          ? Math.round(item.calories)
+          : null,
+      description: item.description?.trim() || null,
+    });
   }
   return byKey;
 };
 
-export { estimateCalories };
+export { enrichDishes };
+export type { DishFacts };
