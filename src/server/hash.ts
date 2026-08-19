@@ -5,8 +5,7 @@ import { normalizeDishName } from "@/src/lib/normalize";
 const sha256Hex = (data: string | Uint8Array): string =>
   createHash("sha256").update(data).digest("hex");
 
-const dishNameHash = (originalName: string): string =>
-  sha256Hex(normalizeDishName(originalName));
+const dishNameHash = (name: string): string => sha256Hex(normalizeDishName(name));
 
 const SHORT_ID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZabcdefghjkmnpqrstvwxyz"; // no I/L/O/U/i/l/o/u
 
