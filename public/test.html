@@ -28,27 +28,27 @@
 <h1>Cart<span>aly</span> — API test</h1>
 
 <div class="step">
-  <h2>Step 1 — photo → English dish names</h2>
+  <h2>Step 1 — photo → dishes (with everything already known)</h2>
   <div id="drop">Click to choose a menu photo, drag one here, or paste (⌘V)
     <img id="preview" alt="">
   </div>
   <input id="file" type="file" accept="image/*" hidden>
   <button id="parseBtn" disabled>Parse menu</button>
-  <button id="infoBtn" disabled>Load calories</button>
+  <button id="infoBtn" disabled>Load missing info</button>
   <div class="meta" id="parseMeta"></div>
   <div class="err" id="parseErr"></div>
   <ol id="names"></ol>
 </div>
 
 <div class="step">
-  <h2>Step 2 — names → images (max 4 in flight)</h2>
+  <h2>Step 2 — images (cached ones show instantly)</h2>
   <button id="imagesBtn" disabled>Load images</button>
   <div id="grid"></div>
 </div>
 
 <script>
   let photo = null;
-  let dishes = [];
+  let menuDishes = [];
   const $ = (id) => document.getElementById(id);
 
   const setPhoto = (f) => {
@@ -69,6 +69,23 @@
   $("drop").ondragover = (e) => e.preventDefault();
   $("drop").ondrop = (e) => { e.preventDefault(); setPhoto(e.dataTransfer.files[0]); };
 
+  const factText = (d) => {
+    const kcal = d.calories ? `~${d.calories} kcal` : null;
+    return [kcal, d.description].filter(Boolean).join(" — ");
+  };
+
+  const renderNames = () => {
+    $("names").innerHTML = "";
+    for (const d of menuDishes) {
+      const li = document.createElement("li");
+      li.dataset.name = d.name;
+      li.innerHTML = `${d.name} — ${d.originalName} <span class="kc"></span>`;
+      const facts = factText(d);
+      if (facts) li.querySelector(".kc").textContent = `· ${facts}`;
+      $("names").appendChild(li);
+    }
+  };
+
   $("parseBtn").onclick = async () => {
     $("parseBtn").disabled = true;
     $("parseErr").textContent = "";
@@ -87,17 +104,14 @@
         $("parseErr").textContent = `${res.status}: ${body.error ?? "unknown error"}`;
         return;
       }
-      dishes = body.data.menu.dishes.map((d) => d.name);
+      menuDishes = body.data.menu.dishes;
+      const known = menuDishes.filter((d) => d.imageUrl).length;
       $("parseMeta").textContent =
-        `menuId ${body.data.menuId} · cached: ${body.data.cached} · ${ms} ms · ${dishes.length} dishes`;
-      for (const d of body.data.menu.dishes) {
-        const li = document.createElement("li");
-        li.dataset.name = d.name;
-        li.innerHTML = `${d.name} — ${d.originalName ?? "?"} <span class="kc"></span>`;
-        $("names").appendChild(li);
-      }
-      $("imagesBtn").disabled = dishes.length === 0;
-      $("infoBtn").disabled = dishes.length === 0;
+        `menuId ${body.data.menuId} · cached: ${body.data.cached} · ${ms} ms · ` +
+        `${menuDishes.length} dishes · ${known} images already cached`;
+      renderNames();
+      $("imagesBtn").disabled = menuDishes.length === 0;
+      $("infoBtn").disabled = menuDishes.length === 0;
     } catch (e) {
       $("parseMeta").textContent = "";
       $("parseErr").textContent = String(e);
@@ -106,32 +120,44 @@
     }
   };
 
-  $("infoBtn").onclick = async () => {
-    $("infoBtn").disabled = true;
-    const t0 = performance.now();
-    try {
-      const res = await fetch("/api/dish-info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ names: dishes }),
-      });
-      const body = await res.json();
-      const ms = Math.round(performance.now() - t0);
-      if (!res.ok || body.error) {
-        $("parseErr").textContent = `${res.status}: ${body.error ?? "error"}`;
-        return;
-      }
-      for (const d of body.data.dishes) {
-        const li = document.querySelector(`li[data-name="${CSS.escape(d.name)}"]`);
-        if (li) {
-          const kcal = d.calories ? `~${d.calories} kcal` : "kcal n/a";
-          li.querySelector(".kc").textContent = `· ${kcal}${d.description ? ` — ${d.description}` : ""}`;
-        }
-      }
-      $("parseMeta").textContent += ` · info ${ms} ms`;
-    } finally {
+  const applyInfo = (items) => {
+    for (const d of items) {
+      const dish = menuDishes.find((m) => m.name === d.name);
+      if (dish) Object.assign(dish, { calories: d.calories, description: d.description });
+      const li = document.querySelector(`li[data-name="${CSS.escape(d.name)}"]`);
+      const facts = factText(d);
+      if (li && facts) li.querySelector(".kc").textContent = `· ${facts}`;
+    }
+  };
+
+  const fetchInfo = async (names, tries) => {
+    const res = await fetch("/api/dish-info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ names }),
+    });
+    const body = await res.json();
+    if (!res.ok || body.error) {
+      $("parseErr").textContent = `${res.status}: ${body.error ?? "error"}`;
+      return;
+    }
+    applyInfo(body.data.dishes);
+    if (body.data.pending.length > 0 && tries > 0) {
+      $("parseMeta").textContent = $("parseMeta").textContent.replace(/ · \d+ pending$/, "") + ` · ${body.data.pending.length} pending`;
+      setTimeout(() => fetchInfo(body.data.pending, tries - 1), 4000);
+    } else {
+      $("parseMeta").textContent = $("parseMeta").textContent.replace(/ · \d+ pending$/, "");
       $("infoBtn").disabled = false;
     }
+  };
+
+  $("infoBtn").onclick = () => {
+    const gaps = menuDishes
+      .filter((d) => d.calories === null || d.description === null)
+      .map((d) => d.name);
+    if (gaps.length === 0) return;
+    $("infoBtn").disabled = true;
+    fetchInfo(gaps, 3);
   };
 
   const loadOne = async (card, name) => {
@@ -163,14 +189,20 @@
   $("imagesBtn").onclick = async () => {
     $("imagesBtn").disabled = true;
     $("grid").innerHTML = "";
-    const cards = dishes.map((name) => {
+    const queue = [];
+    for (const d of menuDishes) {
       const card = document.createElement("div");
       card.className = "card";
-      card.innerHTML = `<img alt=""><div>${name}</div><div class="st">queued</div>`;
+      card.innerHTML = `<img alt=""><div>${d.name}</div><div class="st"></div>`;
       $("grid").appendChild(card);
-      return { card, name };
-    });
-    const queue = [...cards];
+      if (d.imageUrl) {
+        card.querySelector("img").src = d.imageUrl;
+        card.querySelector(".st").textContent = "from parse response";
+      } else {
+        card.querySelector(".st").textContent = "queued";
+        queue.push({ card, name: d.name });
+      }
+    }
     await Promise.all(
       Array.from({ length: 4 }, async () => {
         while (queue.length) {

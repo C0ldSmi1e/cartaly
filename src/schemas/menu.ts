@@ -18,6 +18,7 @@ const ParsedMenuSchema = z.object({
 
 // POST /api/dish-info result: per-dish facts derived from the name alone,
 // cached globally on the dishes row (same economics as images).
+// `pending` lists names still being enriched after the response.
 const DishInfoResultSchema = z.object({
   dishes: z.array(
     z.object({
@@ -26,18 +27,50 @@ const DishInfoResultSchema = z.object({
       description: z.string().nullable(),
     }),
   ),
+  pending: z.array(z.string()),
+});
+
+// Response-side dish: parsed names joined with whatever the global dishes
+// table already knows. Nulls mark facts not computed yet.
+const MenuDishSchema = z.object({
+  name: z.string(),
+  originalName: z.string(),
+  calories: z.number().nullable(),
+  description: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+});
+
+const MenuViewSchema = z.object({
+  isMenu: z.boolean(),
+  dishes: z.array(MenuDishSchema),
 });
 
 const ParseMenuResultSchema = z.object({
   menuId: z.string(),
-  menu: ParsedMenuSchema,
+  menu: MenuViewSchema,
   cached: z.boolean(),
 });
 
 type Dish = z.infer<typeof DishSchema>;
 type ParsedMenu = z.infer<typeof ParsedMenuSchema>;
+type MenuDish = z.infer<typeof MenuDishSchema>;
+type MenuView = z.infer<typeof MenuViewSchema>;
 type ParseMenuResult = z.infer<typeof ParseMenuResultSchema>;
 type DishInfoResult = z.infer<typeof DishInfoResultSchema>;
 
-export { DishSchema, ParsedMenuSchema, ParseMenuResultSchema, DishInfoResultSchema };
-export type { Dish, ParsedMenu, ParseMenuResult, DishInfoResult };
+export {
+  DishSchema,
+  ParsedMenuSchema,
+  MenuDishSchema,
+  MenuViewSchema,
+  ParseMenuResultSchema,
+  DishInfoResultSchema,
+};
+export type {
+  Dish,
+  ParsedMenu,
+  MenuDish,
+  MenuView,
+  ParseMenuResult,
+  DishInfoResult,
+};

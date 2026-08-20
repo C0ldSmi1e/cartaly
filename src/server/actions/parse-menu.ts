@@ -5,6 +5,7 @@ import { menus, dishes } from "@/src/server/db/schema";
 import { normalizePhoto } from "@/src/server/photo";
 import { parseMenuPhoto } from "@/src/server/ai/parse";
 import { sha256Hex, dishNameHash, shortId } from "@/src/server/hash";
+import { toMenuView } from "@/src/server/menu-view";
 import { assertSpendBudget, recordSpend } from "@/src/server/spend";
 import { BadRequestError, isUniqueViolation } from "@/src/server/errors";
 import type { ParsedMenu, ParseMenuResult } from "@/src/schemas/menu";
@@ -16,7 +17,7 @@ const findCached = (photoHash: string): ParseMenuResult | null => {
   }
   return {
     menuId: row.id,
-    menu: JSON.parse(row.menuJson) as ParsedMenu,
+    menu: toMenuView(JSON.parse(row.menuJson) as ParsedMenu),
     cached: true,
   };
 };
@@ -67,7 +68,7 @@ const parseMenu = async ({
     throw error;
   }
 
-  return { menuId, menu, cached: false };
+  return { menuId, menu: toMenuView(menu), cached: false };
 };
 
 export { parseMenu };

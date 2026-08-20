@@ -26,7 +26,7 @@ const DishFactsSchema = z.object({
         .string()
         .nullable()
         .describe(
-          "One short plain-English sentence saying what the dish is; null if unclear",
+          "One short plain-English sentence saying what the dish is; null if you don't recognize it",
         ),
     }),
   ),
@@ -50,7 +50,9 @@ const enrichDishes = async (names: string[]): Promise<Map<string, DishFacts>> =>
               text:
                 "For each dish name: estimate the calories of one typical serving, and " +
                 "write one short plain-English sentence saying what the dish is. " +
-                "Echo each name exactly as given. Use null when you cannot tell.\n" +
+                "Echo each name exactly as given. " +
+                "If you do not recognize a dish or cannot say what it is, return null — " +
+                "never write a sentence saying it is unclear or unknown.\n" +
                 names.map((name) => `- ${name}`).join("\n"),
             },
           ],
