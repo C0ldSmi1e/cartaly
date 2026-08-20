@@ -2,7 +2,7 @@ import "server-only";
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { env } from "@/src/server/env";
-import { ParsedMenuSchema, type ParsedMenu } from "@/src/schemas/menu";
+import { ParsedPageSchema, type ParsedPage } from "@/src/schemas/menu";
 import { menuLimits } from "@/src/config/constants";
 import { normalizeDishName } from "@/src/lib/normalize";
 import { UpstreamError } from "@/src/server/errors";
@@ -27,7 +27,7 @@ const PROMPT = [
 ].join("\n");
 
 // Dedupe by normalized name and enforce the cap the schema can't express.
-const sanitize = (menu: ParsedMenu): ParsedMenu => {
+const sanitize = (menu: ParsedPage): ParsedPage => {
   const seen = new Set<string>();
   const dishes = [];
   for (const dish of menu.dishes) {
@@ -49,7 +49,7 @@ const parseMenuPhoto = async ({
   jpegBytes,
 }: {
   jpegBytes: Uint8Array;
-}): Promise<ParsedMenu> => {
+}): Promise<ParsedPage> => {
   const imageUrl = `data:image/jpeg;base64,${Buffer.from(jpegBytes).toString("base64")}`;
   let response;
   try {
@@ -65,7 +65,7 @@ const parseMenuPhoto = async ({
           ],
         },
       ],
-      text: { format: zodTextFormat(ParsedMenuSchema, "parsed_menu") },
+      text: { format: zodTextFormat(ParsedPageSchema, "menu_page") },
     });
   } catch (error) {
     console.error("parse-menu OpenAI call failed:", error);

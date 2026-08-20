@@ -47,9 +47,19 @@ until R2 creds land in .env (config-only swap).
 Current build scope: **photo in → English dish names + one image each (1:1)**.
 The parse call only identifies dishes by their most common English name; the
 dish identity (image cache key) is `sha256(normalize(englishName))`. Attributes
-return one step at a time: `originalName` + `calories` are back (2026-08-17).
-Still deferred: prices, translations/targetLang, tags, spice, romanization,
-descriptions, currency. Two-endpoint lazy flow unchanged.
+return one step at a time: `originalName` + `calories` are back (2026-08-17),
+`description` via the dish-info lane (2026-08-19). Still deferred: prices,
+translations/targetLang, tags, spice, romanization, currency.
+
+## Page-based menus (2026-08-20)
+
+A menu is an identity plus references to pages; its dish list is derived
+(pages in order → dedupe by name → join dish facts). `pages` is the parse-cache
+unit (one row per photo hash, shared across menus). Scan accepts up to 10
+photos per request (parsed with concurrency 4); anyone with the link can add
+pages via `POST /api/menus/[id]/pages`; max 50 pages per menu. Re-scanning a
+known photo creates a fresh menu referencing the cached page — menu identity
+stays private to the scanner, convergence happens via the share link.
 
 ## Phase 3 — Menu UX
 

@@ -5,9 +5,11 @@ export const pagination = {
 };
 
 export const menuLimits = {
-  maxDishes: 60,
-  maxUploadBytes: 10 * 1024 * 1024,
+  maxDishes: 100, // per page
+  maxUploadBytes: 10 * 1024 * 1024, // per photo
   maxImageDim: 2048,
+  maxPagesPerMenu: 50,
+  maxPhotosPerRequest: 20,
 };
 
 // Version prefix for R2 image keys. Bump when the image prompt changes.

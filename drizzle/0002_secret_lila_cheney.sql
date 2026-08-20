@@ -1,1 +1,0 @@
-ALTER TABLE `dishes` ADD `description` text;

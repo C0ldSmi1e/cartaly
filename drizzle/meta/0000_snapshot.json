@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b2d77804-8845-4ae6-b569-69f878ba1f5a",
+  "id": "c44c42e1-6901-401c-bd12-6f27eedd56ec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "dishes": {
@@ -23,6 +23,20 @@
         },
         "image_key": {
           "name": "image_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "calories": {
+          "name": "calories",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -50,13 +64,13 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "menus": {
-      "name": "menus",
+    "menu_pages": {
+      "name": "menu_pages",
       "columns": {
-        "id": {
-          "name": "id",
+        "menu_id": {
+          "name": "menu_id",
           "type": "text",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
@@ -67,8 +81,91 @@
           "notNull": true,
           "autoincrement": false
         },
-        "menu_json": {
-          "name": "menu_json",
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "menu_pages_menu_id_menus_id_fk": {
+          "name": "menu_pages_menu_id_menus_id_fk",
+          "tableFrom": "menu_pages",
+          "tableTo": "menus",
+          "columnsFrom": [
+            "menu_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "menu_pages_photo_hash_pages_photo_hash_fk": {
+          "name": "menu_pages_photo_hash_pages_photo_hash_fk",
+          "tableFrom": "menu_pages",
+          "tableTo": "pages",
+          "columnsFrom": [
+            "photo_hash"
+          ],
+          "columnsTo": [
+            "photo_hash"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "menu_pages_menu_id_photo_hash_pk": {
+          "columns": [
+            "menu_id",
+            "photo_hash"
+          ],
+          "name": "menu_pages_menu_id_photo_hash_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "menus": {
+      "name": "menus",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pages": {
+      "name": "pages",
+      "columns": {
+        "photo_hash": {
+          "name": "photo_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dishes_json": {
+          "name": "dishes_json",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -82,15 +179,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "menus_photo_hash": {
-          "name": "menus_photo_hash",
-          "columns": [
-            "photo_hash"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

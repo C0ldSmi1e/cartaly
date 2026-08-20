@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1787003015512,
-      "tag": "0000_good_redwing",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1787080955644,
-      "tag": "0001_typical_lady_bullseye",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1787166967351,
-      "tag": "0002_secret_lila_cheney",
+      "when": 1787260867296,
+      "tag": "0000_glamorous_ultragirl",
       "breakpoints": true
     }
   ]
