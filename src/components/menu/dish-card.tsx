@@ -9,13 +9,17 @@ const VIEWPORT_MARGIN = "600px";
 const DishCard = ({
   dish,
   image,
+  orderQty,
   onVisible,
   onRetry,
+  onBump,
 }: {
   dish: MenuDish;
   image: ImageState;
+  orderQty: number;
   onVisible: (name: string) => void;
   onRetry: (name: string) => void;
+  onBump: (name: string, delta: 1 | -1) => void;
 }) => {
   const cardRef = useRef<HTMLElement>(null);
 
@@ -87,6 +91,40 @@ const DishCard = ({
             {dish.description}
           </p>
         )}
+        <div className="mt-2 flex justify-end">
+          {orderQty === 0 ? (
+            <button
+              type="button"
+              onClick={() => onBump(dish.name, 1)}
+              aria-label={`Add ${dish.name} to the order`}
+              className="flex size-8 items-center justify-center rounded-full bg-accent-soft text-lg font-bold text-accent"
+            >
+              +
+            </button>
+          ) : (
+            <div className="flex items-center gap-2.5 rounded-full bg-accent px-3 py-1.5 text-white">
+              <button
+                type="button"
+                onClick={() => onBump(dish.name, -1)}
+                aria-label={`Remove one ${dish.name}`}
+                className="text-base font-bold"
+              >
+                −
+              </button>
+              <span className="min-w-3 text-center text-sm font-bold">
+                {orderQty}
+              </span>
+              <button
+                type="button"
+                onClick={() => onBump(dish.name, 1)}
+                aria-label={`Add one ${dish.name}`}
+                className="text-base font-bold"
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );

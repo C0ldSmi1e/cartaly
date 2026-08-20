@@ -7,6 +7,7 @@ import type {
   MenuView,
   DishInfoResult,
   ParseMenuResult,
+  OrderResult,
 } from "@/src/schemas/menu";
 import type { StandardResponse } from "@/src/schemas/standard-response";
 import { menuLimits } from "@/src/config/constants";
@@ -15,6 +16,7 @@ import { DishCard } from "@/src/components/menu/dish-card";
 import { PhotoPicker } from "@/src/components/scan/photo-picker";
 import { Modal } from "@/src/components/modal";
 import { ShareModal } from "@/src/components/menu/share-modal";
+import { TableOrder } from "@/src/components/menu/table-order";
 
 type ImageState =
   | { status: "idle" | "queued" | "loading" | "error"; url: null }
@@ -23,6 +25,10 @@ type ImageState =
 const MAX_IN_FLIGHT = 4;
 const INFO_POLL_MS = 4000;
 const INFO_POLL_TRIES = 4;
+const ORDER_POLL_MS = 3000;
+
+const toOrderMap = (result: OrderResult): Record<string, number> =>
+  Object.fromEntries(result.items.map((item) => [item.name, item.qty]));
 
 const toImageState = (dish: MenuDish): ImageState =>
   dish.imageUrl
@@ -32,9 +38,11 @@ const toImageState = (dish: MenuDish): ImageState =>
 const MenuScreen = ({
   menuId,
   initialDishes,
+  initialOrder,
 }: {
   menuId: string;
   initialDishes: MenuDish[];
+  initialOrder: OrderResult;
 }) => {
   const [dishes, setDishes] = useState(initialDishes);
   const [images, setImages] = useState<Record<string, ImageState>>(() =>
@@ -42,6 +50,9 @@ const MenuScreen = ({
   );
   const [scanMoreOpen, setScanMoreOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [order, setOrder] = useState<Record<string, number>>(() =>
+    toOrderMap(initialOrder),
+  );
 
   const queueRef = useRef<string[]>([]);
   const activeRef = useRef(0);
@@ -145,6 +156,55 @@ const MenuScreen = ({
     return () => clearTimeout(timer);
   }, [initialDishes]);
 
+  const bumpOrder = useCallback(
+    (name: string, delta: 1 | -1) => {
+      setOrder((prev) => {
+        const qty = Math.max(0, (prev[name] ?? 0) + delta);
+        const next = { ...prev };
+        if (qty === 0) {
+          delete next[name];
+        } else {
+          next[name] = qty;
+        }
+        return next;
+      });
+      fetch(`/api/menus/${menuId}/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, delta }),
+      })
+        .then(async (res) => {
+          const body = (await res.json()) as StandardResponse<OrderResult>;
+          if (res.ok && body.data !== null) {
+            setOrder(toOrderMap(body.data));
+          }
+        })
+        .catch(() => {
+          // poll reconciles on the next tick
+        });
+    },
+    [menuId],
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+      fetch(`/api/menus/${menuId}/order`)
+        .then(async (res) => {
+          const body = (await res.json()) as StandardResponse<OrderResult>;
+          if (res.ok && body.data !== null) {
+            setOrder(toOrderMap(body.data));
+          }
+        })
+        .catch(() => {
+          // offline — keep the local view
+        });
+    }, ORDER_POLL_MS);
+    return () => clearInterval(timer);
+  }, [menuId]);
+
   const applyMenu = (view: MenuView) => {
     setDishes(view.dishes);
     setImages((prev) => {
@@ -209,17 +269,21 @@ const MenuScreen = ({
 
       {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 pb-16">
         {dishes.map((dish) => (
           <DishCard
             key={dish.name}
             dish={dish}
             image={images[dish.name] ?? { status: "idle", url: null }}
+            orderQty={order[dish.name] ?? 0}
             onVisible={requestImage}
             onRetry={retryImage}
+            onBump={bumpOrder}
           />
         ))}
       </div>
+
+      <TableOrder order={order} dishes={dishes} onBump={bumpOrder} />
     </main>
   );
 };

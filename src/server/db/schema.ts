@@ -44,6 +44,21 @@ const dishes = sqliteTable("dishes", {
     .$defaultFn(() => new Date()),
 });
 
+// One communal order per menu; anyone with the link can edit.
+const orderItems = sqliteTable(
+  "order_items",
+  {
+    menuId: text("menu_id")
+      .notNull()
+      .references(() => menus.id),
+    nameHash: text("name_hash")
+      .notNull()
+      .references(() => dishes.nameHash),
+    qty: integer("qty").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.menuId, table.nameHash] })],
+);
+
 // Fixed-window rate limiting; key = "{scope}:{ip}".
 const rateLimits = sqliteTable("rate_limits", {
   key: text("key").primaryKey(),
@@ -51,4 +66,4 @@ const rateLimits = sqliteTable("rate_limits", {
   resetAt: integer("reset_at").notNull(), // epoch ms when the window resets
 });
 
-export { menus, photos, menuPhotos, dishes, rateLimits };
+export { menus, photos, menuPhotos, dishes, orderItems, rateLimits };

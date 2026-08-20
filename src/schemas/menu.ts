@@ -52,12 +52,18 @@ const ParseMenuResultSchema = z.object({
   cached: z.boolean(),
 });
 
+// Communal table order, shared by everyone holding the menu link.
+const OrderResultSchema = z.object({
+  items: z.array(z.object({ name: z.string(), qty: z.number() })),
+});
+
 type Dish = z.infer<typeof DishSchema>;
 type ParsedPhoto = z.infer<typeof ParsedPhotoSchema>;
 type MenuDish = z.infer<typeof MenuDishSchema>;
 type MenuView = z.infer<typeof MenuViewSchema>;
 type ParseMenuResult = z.infer<typeof ParseMenuResultSchema>;
 type DishInfoResult = z.infer<typeof DishInfoResultSchema>;
+type OrderResult = z.infer<typeof OrderResultSchema>;
 
 export {
   DishSchema,
@@ -66,6 +72,7 @@ export {
   MenuViewSchema,
   ParseMenuResultSchema,
   DishInfoResultSchema,
+  OrderResultSchema,
 };
 export type {
   Dish,
@@ -74,4 +81,5 @@ export type {
   MenuView,
   ParseMenuResult,
   DishInfoResult,
+  OrderResult,
 };
