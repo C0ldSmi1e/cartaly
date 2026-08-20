@@ -5,10 +5,10 @@ export const pagination = {
 };
 
 export const menuLimits = {
-  maxDishes: 100, // per page
+  maxDishes: 100, // per photo
   maxUploadBytes: 10 * 1024 * 1024, // per photo
   maxImageDim: 2048,
-  maxPagesPerMenu: 50,
+  maxPhotosPerMenu: 50,
   maxPhotosPerRequest: 20,
 };
 

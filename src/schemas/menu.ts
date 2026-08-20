@@ -12,7 +12,7 @@ const DishSchema = z.object({
 });
 
 // One parsed photo — the AI output unit; a menu is a set of these.
-const ParsedPageSchema = z.object({
+const ParsedPhotoSchema = z.object({
   isMenu: z.boolean().describe("False if the photo is not a food or drink menu"),
   dishes: z.array(DishSchema),
 });
@@ -42,7 +42,7 @@ const MenuDishSchema = z.object({
 });
 
 const MenuViewSchema = z.object({
-  pageCount: z.number(),
+  photoCount: z.number(),
   dishes: z.array(MenuDishSchema),
 });
 
@@ -53,7 +53,7 @@ const ParseMenuResultSchema = z.object({
 });
 
 type Dish = z.infer<typeof DishSchema>;
-type ParsedPage = z.infer<typeof ParsedPageSchema>;
+type ParsedPhoto = z.infer<typeof ParsedPhotoSchema>;
 type MenuDish = z.infer<typeof MenuDishSchema>;
 type MenuView = z.infer<typeof MenuViewSchema>;
 type ParseMenuResult = z.infer<typeof ParseMenuResultSchema>;
@@ -61,7 +61,7 @@ type DishInfoResult = z.infer<typeof DishInfoResultSchema>;
 
 export {
   DishSchema,
-  ParsedPageSchema,
+  ParsedPhotoSchema,
   MenuDishSchema,
   MenuViewSchema,
   ParseMenuResultSchema,
@@ -69,7 +69,7 @@ export {
 };
 export type {
   Dish,
-  ParsedPage,
+  ParsedPhoto,
   MenuDish,
   MenuView,
   ParseMenuResult,

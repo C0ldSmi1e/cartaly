@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c44c42e1-6901-401c-bd12-6f27eedd56ec",
+  "id": "b2904f03-b92a-44bf-8c22-e41440df311f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "dishes": {
@@ -64,8 +64,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "menu_pages": {
-      "name": "menu_pages",
+    "menu_photos": {
+      "name": "menu_photos",
       "columns": {
         "menu_id": {
           "name": "menu_id",
@@ -91,9 +91,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "menu_pages_menu_id_menus_id_fk": {
-          "name": "menu_pages_menu_id_menus_id_fk",
-          "tableFrom": "menu_pages",
+        "menu_photos_menu_id_menus_id_fk": {
+          "name": "menu_photos_menu_id_menus_id_fk",
+          "tableFrom": "menu_photos",
           "tableTo": "menus",
           "columnsFrom": [
             "menu_id"
@@ -104,10 +104,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "menu_pages_photo_hash_pages_photo_hash_fk": {
-          "name": "menu_pages_photo_hash_pages_photo_hash_fk",
-          "tableFrom": "menu_pages",
-          "tableTo": "pages",
+        "menu_photos_photo_hash_photos_photo_hash_fk": {
+          "name": "menu_photos_photo_hash_photos_photo_hash_fk",
+          "tableFrom": "menu_photos",
+          "tableTo": "photos",
           "columnsFrom": [
             "photo_hash"
           ],
@@ -119,12 +119,12 @@
         }
       },
       "compositePrimaryKeys": {
-        "menu_pages_menu_id_photo_hash_pk": {
+        "menu_photos_menu_id_photo_hash_pk": {
           "columns": [
             "menu_id",
             "photo_hash"
           ],
-          "name": "menu_pages_menu_id_photo_hash_pk"
+          "name": "menu_photos_menu_id_photo_hash_pk"
         }
       },
       "uniqueConstraints": {},
@@ -154,8 +154,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "pages": {
-      "name": "pages",
+    "photos": {
+      "name": "photos",
       "columns": {
         "photo_hash": {
           "name": "photo_hash",

@@ -12,7 +12,7 @@ import type { StandardResponse } from "@/src/schemas/standard-response";
 import { menuLimits } from "@/src/config/constants";
 import { buildPhotoForm } from "@/src/lib/image";
 import { DishCard } from "@/src/components/menu/dish-card";
-import { PagePicker } from "@/src/components/scan/page-picker";
+import { PhotoPicker } from "@/src/components/scan/photo-picker";
 
 type ImageState =
   | { status: "idle" | "queued" | "loading" | "error"; url: null }
@@ -163,7 +163,7 @@ const MenuScreen = ({
   };
 
   const addPhotos = async (files: File[]) => {
-    const res = await fetch(`/api/menus/${menuId}/pages`, {
+    const res = await fetch(`/api/menus/${menuId}/photos`, {
       method: "POST",
       body: await buildPhotoForm(files, menuLimits.maxImageDim),
     });
@@ -210,13 +210,29 @@ const MenuScreen = ({
       </header>
 
       {scanMoreOpen && (
-        <div className="mb-5 rounded-2xl border border-line bg-surface p-4">
-          <PagePicker
-            submitText={(count) =>
-              count <= 1 ? "Add this page" : `Add ${count} pages`
-            }
-            onSubmit={addPhotos}
-          />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setScanMoreOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add"
+            className="w-full max-w-md rounded-2xl bg-surface p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setScanMoreOpen(false)}
+                aria-label="Close"
+                className="flex size-8 items-center justify-center rounded-full text-muted-fg"
+              >
+                ✕
+              </button>
+            </div>
+            <PhotoPicker submitText={() => "Add"} onSubmit={addPhotos} />
+          </div>
         </div>
       )}
 

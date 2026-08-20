@@ -5,7 +5,7 @@ import { menuLimits } from "@/src/config/constants";
 
 type StagedPhoto = { file: File; previewUrl: string };
 
-const PagePicker = ({
+const PhotoPicker = ({
   submitText,
   onSubmit,
 }: {
@@ -94,14 +94,14 @@ const PagePicker = ({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={photo.previewUrl}
-              alt={`page ${index + 1}`}
+              alt={`photo ${index + 1}`}
               className="size-20 rounded-lg border border-line object-cover"
             />
             <button
               type="button"
               onClick={() => removePhoto(index)}
               disabled={busy}
-              aria-label={`Remove page ${index + 1}`}
+              aria-label={`Remove photo ${index + 1}`}
               className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background"
             >
               ✕
@@ -136,4 +136,4 @@ const PagePicker = ({
   );
 };
 
-export { PagePicker };
+export { PhotoPicker };

@@ -8,13 +8,13 @@ CREATE TABLE `dishes` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `menu_pages` (
+CREATE TABLE `menu_photos` (
 	`menu_id` text NOT NULL,
 	`photo_hash` text NOT NULL,
 	`position` integer NOT NULL,
 	PRIMARY KEY(`menu_id`, `photo_hash`),
 	FOREIGN KEY (`menu_id`) REFERENCES `menus`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`photo_hash`) REFERENCES `pages`(`photo_hash`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`photo_hash`) REFERENCES `photos`(`photo_hash`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `menus` (
@@ -22,7 +22,7 @@ CREATE TABLE `menus` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `pages` (
+CREATE TABLE `photos` (
 	`photo_hash` text PRIMARY KEY NOT NULL,
 	`dishes_json` text NOT NULL,
 	`created_at` integer NOT NULL

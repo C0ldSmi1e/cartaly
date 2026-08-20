@@ -6,11 +6,11 @@ import type { ParseMenuResult } from "@/src/schemas/menu";
 import type { StandardResponse } from "@/src/schemas/standard-response";
 import { menuLimits } from "@/src/config/constants";
 import { buildPhotoForm } from "@/src/lib/image";
-import { PagePicker } from "@/src/components/scan/page-picker";
+import { PhotoPicker } from "@/src/components/scan/photo-picker";
 
 const ScanScreen = () => {
   const router = useRouter();
-  const [parsing, setParsing] = useState<number | null>(null); // page count
+  const [parsing, setParsing] = useState<number | null>(null); // photo count
 
   const scan = async (files: File[]) => {
     setParsing(files.length);
@@ -50,13 +50,13 @@ const ScanScreen = () => {
               aria-label="Reading the menu"
             />
             <p className="font-medium">
-              Reading {parsing === 1 ? "the menu" : `${parsing} pages`}…
+              Reading {parsing === 1 ? "the menu" : `${parsing} photos`}…
             </p>
           </div>
         ) : (
-          <PagePicker
+          <PhotoPicker
             submitText={(count) =>
-              count <= 1 ? "Read the menu" : `Read ${count} pages`
+              count <= 1 ? "Read the menu" : `Read ${count} photos`
             }
             onSubmit={scan}
           />

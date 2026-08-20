@@ -51,14 +51,14 @@ return one step at a time: `originalName` + `calories` are back (2026-08-17),
 `description` via the dish-info lane (2026-08-19). Still deferred: prices,
 translations/targetLang, tags, spice, romanization, currency.
 
-## Page-based menus (2026-08-20)
+## Photo-based menus (2026-08-20)
 
-A menu is an identity plus references to pages; its dish list is derived
-(pages in order → dedupe by name → join dish facts). `pages` is the parse-cache
-unit (one row per photo hash, shared across menus). Scan accepts up to 10
+A menu is an identity plus references to photos; its dish list is derived
+(photos in order → dedupe by name → join dish facts). `photos` is the parse-cache
+unit (one row per photo hash, shared across menus). Scan accepts up to 20
 photos per request (parsed with concurrency 4); anyone with the link can add
-pages via `POST /api/menus/[id]/pages`; max 50 pages per menu. Re-scanning a
-known photo creates a fresh menu referencing the cached page — menu identity
+photos via `POST /api/menus/[id]/photos`; max 50 photos per menu. Re-scanning a
+known photo creates a fresh menu referencing the cached photo — menu identity
 stays private to the scanner, convergence happens via the share link.
 
 ## Phase 3 — Menu UX

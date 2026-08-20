@@ -1,6 +1,6 @@
 import { sqliteTable, text, integer, primaryKey } from "drizzle-orm/sqlite-core";
 
-// A menu is an identity plus references to pages; its dish list is derived.
+// A menu is an identity plus references to photos; its dish list is derived.
 const menus = sqliteTable("menus", {
   id: text("id").primaryKey(), // short slug used in /m/[id]
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -9,23 +9,23 @@ const menus = sqliteTable("menus", {
 });
 
 // Parse-cache unit: one row per unique photo, shared across menus.
-const pages = sqliteTable("pages", {
+const photos = sqliteTable("photos", {
   photoHash: text("photo_hash").primaryKey(), // sha256 of the normalized photo
-  dishesJson: text("dishes_json").notNull(), // ParsedPage dishes as JSON
+  dishesJson: text("dishes_json").notNull(), // ParsedPhoto dishes as JSON
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
-const menuPages = sqliteTable(
-  "menu_pages",
+const menuPhotos = sqliteTable(
+  "menu_photos",
   {
     menuId: text("menu_id")
       .notNull()
       .references(() => menus.id),
     photoHash: text("photo_hash")
       .notNull()
-      .references(() => pages.photoHash),
+      .references(() => photos.photoHash),
     position: integer("position").notNull(),
   },
   (table) => [primaryKey({ columns: [table.menuId, table.photoHash] })],
@@ -51,4 +51,4 @@ const rateLimits = sqliteTable("rate_limits", {
   resetAt: integer("reset_at").notNull(), // epoch ms when the window resets
 });
 
-export { menus, pages, menuPages, dishes, rateLimits };
+export { menus, photos, menuPhotos, dishes, rateLimits };

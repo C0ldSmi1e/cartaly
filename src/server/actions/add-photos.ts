@@ -1,15 +1,15 @@
 import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/src/server/db";
-import { menus, menuPages } from "@/src/server/db/schema";
-import { parsePages } from "@/src/server/actions/parse-page";
+import { menus, menuPhotos } from "@/src/server/db/schema";
+import { parsePhotos } from "@/src/server/actions/parse-photo";
 import { deriveMenu } from "@/src/server/menu-view";
 import { menuLimits } from "@/src/config/constants";
 import { BadRequestError, NotFoundError } from "@/src/server/errors";
 import type { ParseMenuResult } from "@/src/schemas/menu";
 
 // Anyone holding the menu link can contribute pages — that's the share model.
-const addPages = async ({
+const addPhotos = async ({
   menuId,
   photos,
 }: {
@@ -23,16 +23,16 @@ const addPages = async ({
 
   const existing = db
     .select()
-    .from(menuPages)
-    .where(eq(menuPages.menuId, menuId))
+    .from(menuPhotos)
+    .where(eq(menuPhotos.menuId, menuId))
     .all();
-  if (existing.length + photos.length > menuLimits.maxPagesPerMenu) {
+  if (existing.length + photos.length > menuLimits.maxPhotosPerMenu) {
     throw new BadRequestError(
-      `A menu can have at most ${menuLimits.maxPagesPerMenu} pages`,
+      `A menu can have at most ${menuLimits.maxPhotosPerMenu} pages`,
     );
   }
 
-  const results = await parsePages(photos);
+  const results = await parsePhotos(photos);
   const valid = results.filter((result) => result.valid);
   const attached = new Set(existing.map((row) => row.photoHash));
   const fresh = [
@@ -41,7 +41,7 @@ const addPages = async ({
 
   if (valid.length === 0) {
     throw new BadRequestError(
-      "Those photos don't look like menu pages — try clearer shots",
+      "Those photos don't look like menu photos — try clearer ones",
     );
   }
 
@@ -50,7 +50,7 @@ const addPages = async ({
       existing.reduce((max, row) => Math.max(max, row.position), -1) + 1;
     db.transaction((tx) => {
       fresh.forEach((page, index) => {
-        tx.insert(menuPages)
+        tx.insert(menuPhotos)
           .values({
             menuId,
             photoHash: page.photoHash,
@@ -69,4 +69,4 @@ const addPages = async ({
   };
 };
 
-export { addPages };
+export { addPhotos };
