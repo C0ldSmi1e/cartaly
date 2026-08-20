@@ -14,6 +14,14 @@ const client = new OpenAI({
 
 const INFO_MODEL = "gpt-5.6-luna";
 
+const PROMPT = [
+  "For each dish name: estimate the calories of one typical serving, and",
+  "write one short plain-English sentence saying what the dish is.",
+  "Echo each name exactly as given.",
+  "If you do not recognize a dish or cannot say what it is, return null —",
+  "never write a sentence saying it is unclear or unknown.",
+].join(" ");
+
 const DishFactsSchema = z.object({
   items: z.array(
     z.object({
@@ -47,13 +55,7 @@ const enrichDishes = async (names: string[]): Promise<Map<string, DishFacts>> =>
           content: [
             {
               type: "input_text",
-              text:
-                "For each dish name: estimate the calories of one typical serving, and " +
-                "write one short plain-English sentence saying what the dish is. " +
-                "Echo each name exactly as given. " +
-                "If you do not recognize a dish or cannot say what it is, return null — " +
-                "never write a sentence saying it is unclear or unknown.\n" +
-                names.map((name) => `- ${name}`).join("\n"),
+              text: `${PROMPT}\n${names.map((name) => `- ${name}`).join("\n")}`,
             },
           ],
         },
