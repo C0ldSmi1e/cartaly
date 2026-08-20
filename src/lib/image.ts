@@ -27,4 +27,13 @@ const downscalePhoto = async (file: File, maxDim: number): Promise<Blob> => {
   }
 };
 
-export { downscalePhoto };
+const buildPhotoForm = async (files: File[], maxDim: number): Promise<FormData> => {
+  const form = new FormData();
+  const photos = await Promise.all(
+    files.map((file) => downscalePhoto(file, maxDim)),
+  );
+  photos.forEach((photo, index) => form.append("photo", photo, `page-${index}.jpg`));
+  return form;
+};
+
+export { downscalePhoto, buildPhotoForm };

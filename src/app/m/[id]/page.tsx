@@ -22,5 +22,5 @@ export default async function MenuPage(props: PageProps<"/m/[id]">) {
     throw error;
   }
 
-  return <MenuScreen initialDishes={menu.dishes} />;
+  return <MenuScreen menuId={id} initialDishes={menu.dishes} />;
 }
