@@ -79,15 +79,13 @@ const DishCard = ({
             </span>
           )}
         </div>
-        {dish.originalName !== dish.name && (
+        {dish.originalName && (
           <p className="truncate text-xs text-accent">{dish.originalName}</p>
         )}
-        {dish.description ? (
+        {dish.description && (
           <p className="mt-1 line-clamp-2 text-xs text-muted-fg">
             {dish.description}
           </p>
-        ) : (
-          <p className="mt-1 text-xs text-muted-fg/50">…</p>
         )}
       </div>
     </article>
