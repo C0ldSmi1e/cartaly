@@ -247,16 +247,43 @@ const MenuScreen = ({
           <button
             type="button"
             onClick={() => setShareOpen(true)}
-            className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium"
+            aria-label="Share"
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
           >
-            Share
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M10 12.5V2.5" />
+              <path d="M6.5 5.5 10 2l3.5 3.5" />
+              <path d="M6.5 8.5h-2A1.5 1.5 0 0 0 3 10v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 17 16v-6a1.5 1.5 0 0 0-1.5-1.5h-2" />
+            </svg>
           </button>
           <button
             type="button"
             onClick={() => setScanMoreOpen((open) => !open)}
-            className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white"
+            aria-label="Add photos"
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
           >
-            Scan more
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M10 3.5v13M3.5 10h13" />
+            </svg>
           </button>
         </div>
       </header>
