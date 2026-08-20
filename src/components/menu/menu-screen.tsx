@@ -13,6 +13,8 @@ import { menuLimits } from "@/src/config/constants";
 import { buildPhotoForm } from "@/src/lib/image";
 import { DishCard } from "@/src/components/menu/dish-card";
 import { PhotoPicker } from "@/src/components/scan/photo-picker";
+import { Modal } from "@/src/components/modal";
+import { ShareModal } from "@/src/components/menu/share-modal";
 
 type ImageState =
   | { status: "idle" | "queued" | "loading" | "error"; url: null }
@@ -38,8 +40,8 @@ const MenuScreen = ({
   const [images, setImages] = useState<Record<string, ImageState>>(() =>
     Object.fromEntries(initialDishes.map((dish) => [dish.name, toImageState(dish)])),
   );
-  const [copied, setCopied] = useState(false);
   const [scanMoreOpen, setScanMoreOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const queueRef = useRef<string[]>([]);
   const activeRef = useRef(0);
@@ -175,16 +177,6 @@ const MenuScreen = ({
     setScanMoreOpen(false);
   };
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // clipboard unavailable — the URL bar still works
-    }
-  };
-
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-6">
       <header className="mb-5 flex items-center justify-between gap-3">
@@ -194,10 +186,10 @@ const MenuScreen = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={copyLink}
+            onClick={() => setShareOpen(true)}
             className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium"
           >
-            {copied ? "Link copied" : "Share"}
+            Share
           </button>
           <button
             type="button"
@@ -210,31 +202,12 @@ const MenuScreen = ({
       </header>
 
       {scanMoreOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setScanMoreOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Add"
-            className="w-full max-w-md rounded-2xl bg-surface p-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-2 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setScanMoreOpen(false)}
-                aria-label="Close"
-                className="flex size-8 items-center justify-center rounded-full text-muted-fg"
-              >
-                ✕
-              </button>
-            </div>
-            <PhotoPicker submitText={() => "Add"} onSubmit={addPhotos} />
-          </div>
-        </div>
+        <Modal ariaLabel="Add" onClose={() => setScanMoreOpen(false)}>
+          <PhotoPicker submitText={() => "Add"} onSubmit={addPhotos} />
+        </Modal>
       )}
+
+      {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
 
       <div className="flex flex-col gap-3">
         {dishes.map((dish) => (
