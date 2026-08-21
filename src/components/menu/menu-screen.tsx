@@ -17,6 +17,8 @@ import { PhotoPicker } from "@/src/components/scan/photo-picker";
 import { Modal } from "@/src/components/modal";
 import { ShareModal } from "@/src/components/menu/share-modal";
 import { TableOrder } from "@/src/components/menu/table-order";
+import { ReadingView } from "@/src/components/scan/reading-view";
+import { takeScanHandoff } from "@/src/lib/scan-handoff";
 
 type ImageState =
   | { status: "idle" | "queued" | "loading" | "error"; url: null }
@@ -53,6 +55,30 @@ const MenuScreen = ({
   const [order, setOrder] = useState<Record<string, number>>(() =>
     toOrderMap(initialOrder),
   );
+  const [infoSettled, setInfoSettled] = useState(() =>
+    initialDishes.every(
+      (dish) => dish.calories !== null && dish.description !== null,
+    ),
+  );
+  const [holdPhotoUrl, setHoldPhotoUrl] = useState<string | null>(null);
+  const holdUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const url = takeScanHandoff(menuId);
+      if (url) {
+        holdUrlRef.current = url;
+        setHoldPhotoUrl(url);
+      }
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      if (holdUrlRef.current) {
+        URL.revokeObjectURL(holdUrlRef.current);
+        holdUrlRef.current = null;
+      }
+    };
+  }, [menuId]);
 
   const queueRef = useRef<string[]>([]);
   const activeRef = useRef(0);
@@ -138,9 +164,12 @@ const MenuScreen = ({
       if (body.data.pending.length > 0 && tries > 0) {
         const pending = body.data.pending;
         setTimeout(() => pollInfoRef.current(pending, tries - 1), INFO_POLL_MS);
+      } else {
+        setInfoSettled(true);
       }
     } catch {
       // info is decoration — a failed poll just leaves facts blank
+      setInfoSettled(true);
     }
   }, []);
 
@@ -152,6 +181,9 @@ const MenuScreen = ({
     const gaps = initialDishes
       .filter((dish) => dish.calories === null || dish.description === null)
       .map((dish) => dish.name);
+    if (gaps.length === 0) {
+      return;
+    }
     const timer = setTimeout(() => pollInfoRef.current(gaps, INFO_POLL_TRIES), 0);
     return () => clearTimeout(timer);
   }, [initialDishes]);
@@ -206,6 +238,12 @@ const MenuScreen = ({
   }, [menuId]);
 
   const applyMenu = (view: MenuView) => {
+    const hasGaps = view.dishes.some(
+      (dish) => dish.calories === null || dish.description === null,
+    );
+    if (hasGaps) {
+      setInfoSettled(false);
+    }
     setDishes(view.dishes);
     setImages((prev) => {
       const next: Record<string, ImageState> = {};
@@ -237,56 +275,69 @@ const MenuScreen = ({
     setScanMoreOpen(false);
   };
 
+  // A dish appears once it has substance (photo or facts); once info settles,
+  // everything shows so nothing can stay hidden forever.
+  const visibleDishes = dishes.filter(
+    (dish) =>
+      infoSettled ||
+      images[dish.name]?.status === "done" ||
+      dish.calories !== null ||
+      dish.description !== null,
+  );
+  const holding = visibleDishes.length === 0 && dishes.length > 0;
+
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-6">
-      <header className="mb-5 flex items-center justify-between gap-3">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Cart<span className="text-brass">aly</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShareOpen(true)}
-            aria-label="Share"
-            className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
-          >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-6">
+      {holding ? null : (
+        <header className="animate-fade mb-5 flex items-center justify-between gap-3">
+          <Link href="/" className="text-xl font-bold tracking-tight">
+            Cart<span className="text-brass">aly</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShareOpen(true)}
+              aria-label="Share"
+              className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
             >
-              <path d="M10 12.5V2.5" />
-              <path d="M6.5 5.5 10 2l3.5 3.5" />
-              <path d="M6.5 8.5h-2A1.5 1.5 0 0 0 3 10v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 17 16v-6a1.5 1.5 0 0 0-1.5-1.5h-2" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => setScanMoreOpen((open) => !open)}
-            aria-label="Add photos"
-            className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
-          >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              aria-hidden="true"
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10 12.5V2.5" />
+                <path d="M6.5 5.5 10 2l3.5 3.5" />
+                <path d="M6.5 8.5h-2A1.5 1.5 0 0 0 3 10v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 17 16v-6a1.5 1.5 0 0 0-1.5-1.5h-2" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setScanMoreOpen((open) => !open)}
+              aria-label="Add photos"
+              className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
             >
-              <path d="M10 3.5v13M3.5 10h13" />
-            </svg>
-          </button>
-        </div>
-      </header>
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <path d="M10 3.5v13M3.5 10h13" />
+              </svg>
+            </button>
+          </div>
+        </header>
+      )}
 
       {scanMoreOpen && (
         <Modal ariaLabel="Add" onClose={() => setScanMoreOpen(false)}>
@@ -296,22 +347,56 @@ const MenuScreen = ({
 
       {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
 
-      <div className="flex flex-col pb-16">
-        {dishes.map((dish, index) => (
-          <div key={dish.name}>
-            <DishCard
-              dish={dish}
-              image={images[dish.name] ?? { status: "idle", url: null }}
-              orderQty={order[dish.name] ?? 0}
-              onVisible={requestImage}
-              onRetry={retryImage}
-              onBump={bumpOrder}
-            />
-            {index < dishes.length - 1 && (
-              <div className="ml-25.5 h-px bg-line" aria-hidden="true" />
-            )}
-          </div>
-        ))}
+      <div className="flex flex-1 flex-col pb-16">
+        {(() => {
+          const visible = visibleDishes;
+          if (holding) {
+            return (
+              <div className="flex flex-1 items-center justify-center">
+                <ReadingView photoUrl={holdPhotoUrl} text="Looking up the dishes…" />
+              </div>
+            );
+          }
+          const rendered = visible.map((dish, index) => {
+            // Stable per-dish stagger so a batch of reveals cascades instead
+            // of popping at once; derived from the name so it never changes.
+            const delay = `${(dish.name.length % 8) * 60}ms`;
+            return (
+              <div
+                key={dish.name}
+                className="animate-rise"
+                style={{ animationDelay: delay }}
+              >
+                <DishCard
+                  dish={dish}
+                  image={images[dish.name] ?? { status: "idle", url: null }}
+                  orderQty={order[dish.name] ?? 0}
+                  onVisible={requestImage}
+                  onRetry={retryImage}
+                  onBump={bumpOrder}
+                />
+                {index < visible.length - 1 && (
+                  <div className="ml-25.5 h-px bg-line" aria-hidden="true" />
+                )}
+              </div>
+            );
+          });
+          return (
+            <>
+              {rendered}
+              {visible.length < dishes.length && (
+                <div className="flex items-center justify-center gap-2.5 py-8 text-xs text-muted-fg">
+                  <div
+                    className="size-4 animate-spin rounded-full border-2 border-line border-t-accent"
+                    role="status"
+                    aria-label="Loading more dishes"
+                  />
+                  loading more dishes…
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       <TableOrder order={order} dishes={dishes} onBump={bumpOrder} />

@@ -46,6 +46,50 @@ body {
   font-family: var(--font-sans), -apple-system, "Segoe UI", sans-serif;
 }
 
+@keyframes sweep {
+  from {
+    top: -18%;
+  }
+  to {
+    top: 108%;
+  }
+}
+.animate-sweep {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  height: 60px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(79 154 110 / 0.28) 45%,
+    rgb(20 69 47 / 0.42) 50%,
+    rgb(79 154 110 / 0.28) 55%,
+    transparent
+  );
+  animation: sweep 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-sweep {
+    animation: none;
+    display: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+.animate-fade {
+  animation: fade 0.5s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade {
+    animation: none;
+  }
+}
+
 @keyframes rise {
   from {
     transform: translateY(14px);
@@ -53,7 +97,7 @@ body {
   }
 }
 .animate-rise {
-  animation: rise 0.32s cubic-bezier(0.2, 0.8, 0.3, 1);
+  animation: rise 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
   .animate-rise {
