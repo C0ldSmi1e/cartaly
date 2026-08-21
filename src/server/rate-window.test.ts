@@ -33,6 +33,17 @@ describe("applyWindow", () => {
     expect(d.next).toEqual({ count: 1, resetAt: 1000 + HOUR });
   });
 
+  test("cost draws multiple units from the window", () => {
+    const first = applyWindow(null, 1000, 50, HOUR, 20);
+    expect(first.allowed).toBe(true);
+    expect(first.next.count).toBe(20);
+    const second = applyWindow(first.next, 1000, 50, HOUR, 20);
+    expect(second.next.count).toBe(40);
+    const third = applyWindow(second.next, 1000, 50, HOUR, 20);
+    expect(third.allowed).toBe(false);
+    expect(third.next.count).toBe(40);
+  });
+
   test("retryAfterSec is at least 1", () => {
     const d = applyWindow({ count: 5, resetAt: 1100 }, 1000, 5, HOUR);
     expect(d.allowed).toBe(false);

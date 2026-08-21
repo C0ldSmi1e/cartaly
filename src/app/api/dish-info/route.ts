@@ -5,7 +5,8 @@ import {
   errorToResponse,
 } from "@/src/server/create-response";
 import { getDishInfo, enrichPending } from "@/src/server/actions/dish-info";
-import { menuLimits } from "@/src/config/constants";
+import { enforceRateLimit, getClientIp } from "@/src/server/rate-limit";
+import { menuLimits, rateLimits } from "@/src/config/constants";
 import { BadRequestError } from "@/src/server/errors";
 
 const bodySchema = z.object({
@@ -14,6 +15,11 @@ const bodySchema = z.object({
 
 const POST = async (request: NextRequest) => {
   try {
+    enforceRateLimit({
+      scope: "info",
+      ip: getClientIp(request),
+      limit: rateLimits.infoPerHour,
+    });
     const body = bodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) {
       throw new BadRequestError("Expected { names: string[] }");

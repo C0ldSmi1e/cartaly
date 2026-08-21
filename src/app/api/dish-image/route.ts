@@ -5,6 +5,8 @@ import {
   errorToResponse,
 } from "@/src/server/create-response";
 import { getDishImage } from "@/src/server/actions/dish-image";
+import { enforceRateLimit, getClientIp } from "@/src/server/rate-limit";
+import { rateLimits } from "@/src/config/constants";
 import { BadRequestError } from "@/src/server/errors";
 
 const bodySchema = z.object({
@@ -13,6 +15,11 @@ const bodySchema = z.object({
 
 const POST = async (request: NextRequest) => {
   try {
+    enforceRateLimit({
+      scope: "image",
+      ip: getClientIp(request),
+      limit: rateLimits.imagesPerHour,
+    });
     const body = bodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) {
       throw new BadRequestError("Expected { name }");

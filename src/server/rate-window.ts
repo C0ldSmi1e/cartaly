@@ -12,12 +12,13 @@ const applyWindow = (
   now: number,
   limit: number,
   windowMs: number,
+  cost = 1,
 ): WindowDecision => {
   const fresh = !current || now >= current.resetAt;
   const window: Window = fresh
     ? { count: 0, resetAt: now + windowMs }
     : { count: current.count, resetAt: current.resetAt };
-  if (window.count >= limit) {
+  if (window.count + cost > limit) {
     return {
       allowed: false,
       next: window,
@@ -26,7 +27,7 @@ const applyWindow = (
   }
   return {
     allowed: true,
-    next: { count: window.count + 1, resetAt: window.resetAt },
+    next: { count: window.count + cost, resetAt: window.resetAt },
     retryAfterSec: 0,
   };
 };

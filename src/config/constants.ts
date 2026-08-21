@@ -12,5 +12,12 @@ export const menuLimits = {
   maxPhotosPerRequest: 20,
 };
 
+// Per IP, fixed one-hour windows. Photos are counted per photo, not per request.
+export const rateLimits = {
+  photosPerHour: 50,
+  imagesPerHour: 100,
+  infoPerHour: 200,
+};
+
 // Version prefix for R2 image keys. Bump when the image prompt changes.
 export const imageCacheVersion = "v1";

@@ -11,6 +11,7 @@ const envSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   S3_PUBLIC_BASE_URL: z.string().optional(),
   DAILY_SPEND_LIMIT_USD: z.coerce.number().positive().optional(),
+  RATE_LIMIT: z.enum(["on", "off"]).default("on"),
 });
 
 // Empty strings (e.g. from a copied .env.example) count as unset.
