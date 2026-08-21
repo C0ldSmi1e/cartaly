@@ -1,0 +1,23 @@
+name: cartaly
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cartaly
+    container_name: cartaly
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - cartaly-data:/app/data
+    networks:
+      - tunnel-net
+
+volumes:
+  cartaly-data:
+
+networks:
+  tunnel-net:
+    external: true

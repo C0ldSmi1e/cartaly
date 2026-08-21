@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+data
+bake-off
+.env*
+!.env.example
+*.md
+docs
+Dockerfile
+docker-compose.yml
+.github
