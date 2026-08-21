@@ -22,6 +22,8 @@ ENV NODE_ENV=production \
 COPY --from=builder --chown=bun:bun /app/.next/standalone ./
 COPY --from=builder --chown=bun:bun /app/.next/static ./.next/static
 COPY --from=builder --chown=bun:bun /app/public ./public
+# sharp's libvips .so is a dlopen dependency, invisible to Next's file tracing
+COPY --from=deps --chown=bun:bun /app/node_modules/@img ./node_modules/@img
 # migrations run on boot (src/server/db); the SQL files must sit at cwd
 COPY --chown=bun:bun drizzle ./drizzle
 RUN mkdir -p data && chown bun:bun data
