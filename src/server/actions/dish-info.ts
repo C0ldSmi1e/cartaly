@@ -5,7 +5,6 @@ import { dishes } from "@/src/server/db/schema";
 import { enrichDishes } from "@/src/server/ai/info";
 import { dishNameHash } from "@/src/server/hash";
 import { normalizeDishName } from "@/src/lib/normalize";
-import { assertSpendBudget, recordSpend } from "@/src/server/spend";
 import { AuthorizationError } from "@/src/server/errors";
 import type { DishInfoResult } from "@/src/schemas/menu";
 
@@ -52,9 +51,7 @@ const enrichPending = async (names: string[]): Promise<void> => {
   }
 
   try {
-    assertSpendBudget("info");
     const facts = await enrichDishes(targets);
-    recordSpend("info");
 
     const rows = db
       .select()

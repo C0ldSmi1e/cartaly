@@ -154,7 +154,6 @@ S3_ENDPOINT=            # R2
 S3_BUCKET=
 S3_ACCESS_KEY_ID=
 S3_SECRET_ACCESS_KEY=
-DAILY_SPEND_LIMIT_USD=
 ```
 
 ## Cost & latency (approx)
@@ -174,7 +173,7 @@ Cache hit-rate is the cost metric that matters.
 - Strip EXIF; keep the normalized photo in R2 (`uploads/{hash}`) for 30 days so
   language switches can re-parse server-side. Derived data lives forever.
 - `dish-image` gated by the `dishes` row (403 otherwise); 60-dish cap;
-  daily-spend kill-switch env var; rate limits in SQLite (5 parses, 80
+  rate limits in SQLite (50 photos, 100
   images /hr/IP).
 - Timeout + one retry on OpenAI calls. Return partial results with `confidence: "low"` flags instead of failing the menu.
 

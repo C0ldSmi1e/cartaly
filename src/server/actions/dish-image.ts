@@ -6,7 +6,6 @@ import { generateDishImage } from "@/src/server/ai/image";
 import { putBlob, blobPublicUrl } from "@/src/server/blob";
 import { dishNameHash } from "@/src/server/hash";
 import { imageCacheVersion } from "@/src/config/constants";
-import { assertSpendBudget, recordSpend } from "@/src/server/spend";
 import { AuthorizationError } from "@/src/server/errors";
 
 type DishImageResult = { url: string; cached: boolean };
@@ -32,9 +31,7 @@ const getDishImage = async ({
     return { url: blobPublicUrl(dish.imageKey), cached: true };
   }
 
-  assertSpendBudget("imageLow");
   const webp = await generateDishImage({ name: dish.name });
-  recordSpend("imageLow");
 
   const imageKey = `${imageCacheVersion}/dish/${nameHash}.webp`;
   await putBlob(imageKey, webp, "image/webp");

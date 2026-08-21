@@ -34,7 +34,7 @@ The product exists after this phase.
 - `src/server/ai/image.ts` — gpt-image-2 → sharp → WebP.
 - `POST /api/dish-image` — dish row must exist (403 gate) → return `image_key`
   or generate once → PUT R2 → UPDATE row (+ increment `hits` on reads).
-- SQLite rate limits (5 parses, 80 images /hr/IP) + daily-spend kill switch.
+- SQLite rate limits (50 photos, 100 images, 200 info /hr/IP).
 - Client lazy-loading (IntersectionObserver, 4-in-flight cap, per-card retry,
   fade-in) → deferred to the UI pass; backend first.
 

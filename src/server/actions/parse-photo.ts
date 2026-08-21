@@ -5,7 +5,6 @@ import { photos, dishes } from "@/src/server/db/schema";
 import { normalizePhoto } from "@/src/server/photo";
 import { parseMenuPhoto } from "@/src/server/ai/parse";
 import { sha256Hex, dishNameHash } from "@/src/server/hash";
-import { assertSpendBudget, recordSpend } from "@/src/server/spend";
 import type { Dish } from "@/src/schemas/menu";
 
 type ParsedPhotoResult =
@@ -32,9 +31,7 @@ const parsePhoto = async (photoBytes: Uint8Array): Promise<ParsedPhotoResult> =>
     };
   }
 
-  assertSpendBudget("parse");
   const page = await parseMenuPhoto({ jpegBytes: normalized });
-  recordSpend("parse");
   if (!page.isMenu || page.dishes.length === 0) {
     return { valid: false };
   }
