@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Cartaly",
-  description: "Point at a menu you can't read — get one you can order from.",
+  description: "Turn any menu into a picture menu — then order it together.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

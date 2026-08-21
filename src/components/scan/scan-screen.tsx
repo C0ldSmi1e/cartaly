@@ -61,7 +61,7 @@ const ScanScreen = () => {
             Cart<span className="text-brass">aly</span>
           </h1>
           <p className="mt-3 max-w-xs text-center text-muted-fg">
-            Point at a menu you can&apos;t read — get one you can order from.
+            Turn any menu into a picture menu — then order it together.
           </p>
           <div className="mt-12 w-full max-w-md">
             <PhotoPicker
