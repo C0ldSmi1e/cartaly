@@ -73,6 +73,10 @@ const ScanScreen = () => {
           </div>
         </>
       )}
+      <p className="fixed inset-x-0 bottom-4 px-6 text-center text-xs text-muted-fg/60">
+        Dish photos and info are AI-generated and can be inaccurate — for reference
+        only.
+      </p>
     </main>
   );
 };
