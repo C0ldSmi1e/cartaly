@@ -13,6 +13,7 @@ const DishCard = ({
   onVisible,
   onRetry,
   onBump,
+  onOpen,
 }: {
   dish: MenuDish;
   image: ImageState;
@@ -20,6 +21,7 @@ const DishCard = ({
   onVisible: (name: string) => void;
   onRetry: (name: string) => void;
   onBump: (name: string, delta: 1 | -1) => void;
+  onOpen: (name: string) => void;
 }) => {
   const cardRef = useRef<HTMLElement>(null);
 
@@ -44,13 +46,20 @@ const DishCard = ({
     <article ref={cardRef} className="flex gap-3.5 py-3">
       <div className="relative size-22 shrink-0 overflow-hidden rounded-xl bg-line">
         {image.status === "done" ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={image.url}
-            alt={dish.name}
-            className="size-full object-cover"
-            loading="lazy"
-          />
+          <button
+            type="button"
+            onClick={() => onOpen(dish.name)}
+            aria-label={`View ${dish.name}`}
+            className="size-full"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.url}
+              alt={dish.name}
+              className="size-full object-cover"
+              loading="lazy"
+            />
+          </button>
         ) : image.status === "error" ? (
           <button
             type="button"

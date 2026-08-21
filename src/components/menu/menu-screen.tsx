@@ -13,6 +13,7 @@ import type { StandardResponse } from "@/src/schemas/standard-response";
 import { menuLimits } from "@/src/config/constants";
 import { buildPhotoForm } from "@/src/lib/image";
 import { DishCard } from "@/src/components/menu/dish-card";
+import { DishDetail } from "@/src/components/menu/dish-detail";
 import { PhotoPicker } from "@/src/components/scan/photo-picker";
 import { Modal } from "@/src/components/modal";
 import { ShareModal } from "@/src/components/menu/share-modal";
@@ -52,6 +53,7 @@ const MenuScreen = ({
   );
   const [scanMoreOpen, setScanMoreOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [detailName, setDetailName] = useState<string | null>(null);
   const [order, setOrder] = useState<Record<string, number>>(() =>
     toOrderMap(initialOrder),
   );
@@ -347,6 +349,24 @@ const MenuScreen = ({
 
       {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
 
+      {detailName &&
+        (() => {
+          const dish = dishes.find((d) => d.name === detailName);
+          if (!dish) {
+            return null;
+          }
+          const image = images[detailName];
+          return (
+            <DishDetail
+              dish={dish}
+              imageUrl={image?.status === "done" ? image.url : null}
+              qty={order[detailName] ?? 0}
+              onBump={bumpOrder}
+              onClose={() => setDetailName(null)}
+            />
+          );
+        })()}
+
       <div className="flex flex-1 flex-col pb-16">
         {(() => {
           const visible = visibleDishes;
@@ -374,6 +394,7 @@ const MenuScreen = ({
                   onVisible={requestImage}
                   onRetry={retryImage}
                   onBump={bumpOrder}
+                  onOpen={setDetailName}
                 />
                 {index < visible.length - 1 && (
                   <div className="ml-25.5 h-px bg-line" aria-hidden="true" />
