@@ -8,7 +8,7 @@ import { UpstreamError } from "@/src/server/errors";
 
 const client = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
-  timeout: 60_000,
+  timeout: 180_000,
   maxRetries: 1,
 });
 
