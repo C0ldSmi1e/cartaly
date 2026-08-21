@@ -241,7 +241,7 @@ const MenuScreen = ({
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-6">
       <header className="mb-5 flex items-center justify-between gap-3">
         <Link href="/" className="text-xl font-bold tracking-tight">
-          Cart<span className="text-accent">aly</span>
+          Cart<span className="text-brass">aly</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -296,17 +296,21 @@ const MenuScreen = ({
 
       {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
 
-      <div className="flex flex-col gap-3 pb-16">
-        {dishes.map((dish) => (
-          <DishCard
-            key={dish.name}
-            dish={dish}
-            image={images[dish.name] ?? { status: "idle", url: null }}
-            orderQty={order[dish.name] ?? 0}
-            onVisible={requestImage}
-            onRetry={retryImage}
-            onBump={bumpOrder}
-          />
+      <div className="flex flex-col pb-16">
+        {dishes.map((dish, index) => (
+          <div key={dish.name}>
+            <DishCard
+              dish={dish}
+              image={images[dish.name] ?? { status: "idle", url: null }}
+              orderQty={order[dish.name] ?? 0}
+              onVisible={requestImage}
+              onRetry={retryImage}
+              onBump={bumpOrder}
+            />
+            {index < dishes.length - 1 && (
+              <div className="ml-25.5 h-px bg-line" aria-hidden="true" />
+            )}
+          </div>
         ))}
       </div>
 

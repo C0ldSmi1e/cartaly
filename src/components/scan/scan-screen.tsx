@@ -35,7 +35,7 @@ const ScanScreen = () => {
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
       <h1 className="text-4xl font-bold tracking-tight">
-        Cart<span className="text-accent">aly</span>
+        Cart<span className="text-brass">aly</span>
       </h1>
       <p className="mt-3 max-w-xs text-center text-muted-fg">
         Point at a menu you can&apos;t read — get one you can order from.

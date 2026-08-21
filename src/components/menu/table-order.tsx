@@ -38,7 +38,7 @@ const TableOrder = ({
       <button
         type="button"
         onClick={() => setSheetOpen(true)}
-        className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-2xl items-center justify-between rounded-full bg-foreground px-6 py-4 text-sm font-semibold text-background shadow-xl"
+        className="animate-rise fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-2xl items-center justify-between rounded-full bg-accent px-6 py-4 text-sm font-semibold text-white shadow-xl"
       >
         <span>
           Table order · {itemCount} item{itemCount === 1 ? "" : "s"}
@@ -55,7 +55,7 @@ const TableOrder = ({
             role="dialog"
             aria-modal="true"
             aria-label="Table order"
-            className="max-h-[78vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-surface p-5"
+            className="animate-rise max-h-[78vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-surface p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-semibold">Table order</h2>

@@ -41,11 +41,8 @@ const DishCard = ({
   }, [dish.name, image.status, onVisible]);
 
   return (
-    <article
-      ref={cardRef}
-      className="flex gap-3 rounded-2xl border border-line bg-surface p-3"
-    >
-      <div className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-line">
+    <article ref={cardRef} className="flex gap-3.5 py-3">
+      <div className="relative size-22 shrink-0 overflow-hidden rounded-xl bg-line">
         {image.status === "done" ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -74,35 +71,39 @@ const DishCard = ({
         )}
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 flex-col py-0.5">
         <div className="flex items-baseline justify-between gap-2">
-          <h3 className="truncate font-semibold">{dish.name}</h3>
+          <h3 className="truncate text-base font-semibold tracking-tight">
+            {dish.name}
+          </h3>
           {dish.calories !== null && (
-            <span className="shrink-0 text-xs text-muted-fg">
+            <span className="shrink-0 rounded-full bg-brass-soft px-2 py-0.5 text-xs text-brass tabular-nums">
               ~{dish.calories} kcal
             </span>
           )}
         </div>
         {dish.originalName && (
-          <p className="truncate text-xs text-accent">{dish.originalName}</p>
+          <p className="mt-px truncate text-xs font-medium text-accent">
+            {dish.originalName}
+          </p>
         )}
         {dish.description && (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-fg">
+          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-fg">
             {dish.description}
           </p>
         )}
-        <div className="mt-2 flex justify-end">
+        <div className="mt-auto flex justify-end pt-1">
           {orderQty === 0 ? (
             <button
               type="button"
               onClick={() => onBump(dish.name, 1)}
               aria-label={`Add ${dish.name} to the order`}
-              className="flex size-8 items-center justify-center rounded-full bg-accent-soft text-lg font-bold text-accent"
+              className="flex size-7 items-center justify-center rounded-full border border-accent text-base leading-none text-accent transition-transform active:scale-90"
             >
               +
             </button>
           ) : (
-            <div className="flex items-center gap-2.5 rounded-full bg-accent px-3 py-1.5 text-white">
+            <div className="flex items-center gap-2.5 rounded-full bg-accent px-3 py-1 text-white">
               <button
                 type="button"
                 onClick={() => onBump(dish.name, -1)}

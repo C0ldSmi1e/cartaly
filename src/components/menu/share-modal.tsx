@@ -13,7 +13,7 @@ const ShareModal = ({ onClose }: { onClose: () => void }) => {
     QRCode.toDataURL(url, {
       width: 480,
       margin: 1,
-      color: { dark: "#241f1bff", light: "#ffffffff" },
+      color: { dark: "#22261fff", light: "#ffffffff" },
     })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null));
