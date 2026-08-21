@@ -287,9 +287,9 @@ const MenuScreen = ({
   const holding = visibleDishes.length === 0 && dishes.length > 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-6">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-2">
       {holding ? null : (
-        <header className="animate-fade mb-5 flex items-center justify-between gap-3">
+        <header className="animate-fade sticky top-0 z-30 -mx-4 mb-4 flex items-center justify-between gap-3 bg-background px-4 py-3">
           <Link href="/" className="text-xl font-bold tracking-tight">
             Cart<span className="text-brass">aly</span>
           </Link>
