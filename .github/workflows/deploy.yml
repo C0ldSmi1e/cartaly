@@ -15,6 +15,6 @@ jobs:
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: deploy
+          username: moon
           key: ${{ secrets.SSH_KEY }}
           script: /home/moon/cartaly/scripts/deploy.sh
