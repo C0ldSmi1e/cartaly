@@ -11,6 +11,9 @@ const envSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   S3_PUBLIC_BASE_URL: z.string().optional(),
   RATE_LIMIT: z.enum(["on", "off"]).default("on"),
+  // "provider:model", e.g. "together:black-forest-labs/FLUX.1-schnell"
+  IMAGE_MODEL: z.string().default("openai:gpt-image-1-mini"),
+  TOGETHER_API_KEY: z.string().optional(),
 });
 
 // Empty strings (e.g. from a copied .env.example) count as unset.
