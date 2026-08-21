@@ -289,7 +289,13 @@ const MenuScreen = ({
   const holding = visibleDishes.length === 0 && dishes.length > 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-2">
+    <main
+      className={
+        holding
+          ? "mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-16"
+          : "mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-2"
+      }
+    >
       {holding ? null : (
         <header className="animate-fade sticky top-0 z-30 -mx-4 mb-4 flex items-center justify-between gap-3 bg-background px-4 py-3">
           <Link href="/" className="text-xl font-bold tracking-tight">
@@ -367,58 +373,57 @@ const MenuScreen = ({
           );
         })()}
 
-      <div className="flex flex-1 flex-col pb-16">
-        {(() => {
-          const visible = visibleDishes;
-          if (holding) {
-            return (
-              <div className="flex flex-1 items-center justify-center">
-                <ReadingView photoUrl={holdPhotoUrl} text="Looking up the dishes…" />
-              </div>
-            );
-          }
-          const rendered = visible.map((dish, index) => {
-            // Stable per-dish stagger so a batch of reveals cascades instead
-            // of popping at once; derived from the name so it never changes.
-            const delay = `${(dish.name.length % 8) * 60}ms`;
-            return (
-              <div
-                key={dish.name}
-                className="animate-rise"
-                style={{ animationDelay: delay }}
-              >
-                <DishCard
-                  dish={dish}
-                  image={images[dish.name] ?? { status: "idle", url: null }}
-                  orderQty={order[dish.name] ?? 0}
-                  onVisible={requestImage}
-                  onRetry={retryImage}
-                  onBump={bumpOrder}
-                  onOpen={setDetailName}
-                />
-                {index < visible.length - 1 && (
-                  <div className="ml-25.5 h-px bg-line" aria-hidden="true" />
-                )}
-              </div>
-            );
-          });
-          return (
-            <>
-              {rendered}
-              {visible.length < dishes.length && (
-                <div className="flex items-center justify-center gap-2.5 py-8 text-xs text-muted-fg">
-                  <div
-                    className="size-4 animate-spin rounded-full border-2 border-line border-t-accent"
-                    role="status"
-                    aria-label="Loading more dishes"
+      {holding ? (
+        <div className="flex flex-1 items-center justify-center">
+          <ReadingView photoUrl={holdPhotoUrl} text="Looking up the dishes…" />
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col pb-16">
+          {(() => {
+            const visible = visibleDishes;
+            const rendered = visible.map((dish, index) => {
+              // Stable per-dish stagger so a batch of reveals cascades instead
+              // of popping at once; derived from the name so it never changes.
+              const delay = `${(dish.name.length % 8) * 60}ms`;
+              return (
+                <div
+                  key={dish.name}
+                  className="animate-rise"
+                  style={{ animationDelay: delay }}
+                >
+                  <DishCard
+                    dish={dish}
+                    image={images[dish.name] ?? { status: "idle", url: null }}
+                    orderQty={order[dish.name] ?? 0}
+                    onVisible={requestImage}
+                    onRetry={retryImage}
+                    onBump={bumpOrder}
+                    onOpen={setDetailName}
                   />
-                  loading more dishes…
+                  {index < visible.length - 1 && (
+                    <div className="ml-25.5 h-px bg-line" aria-hidden="true" />
+                  )}
                 </div>
-              )}
-            </>
-          );
-        })()}
-      </div>
+              );
+            });
+            return (
+              <>
+                {rendered}
+                {visible.length < dishes.length && (
+                  <div className="flex items-center justify-center gap-2.5 py-8 text-xs text-muted-fg">
+                    <div
+                      className="size-4 animate-spin rounded-full border-2 border-line border-t-accent"
+                      role="status"
+                      aria-label="Loading more dishes"
+                    />
+                    loading more dishes…
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       <TableOrder order={order} dishes={dishes} onBump={bumpOrder} />
     </main>
