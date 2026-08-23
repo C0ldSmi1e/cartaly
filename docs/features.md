@@ -23,7 +23,9 @@ Technical design: [SPEC.md](./SPEC.md) · Product overview:
   fuzzy range (~350 kcal), never false precision. Hideable for anyone who'd rather
   not see it.
 - **Filters & search** — Vegetarian / vegan / gluten-free / spicy chips, spice-level
-  dots, category sections, and search across both languages.
+  dots, category sections, and search across both languages. Search shipped
+  first: diacritic-insensitive ("pho" finds "Phở"), matching names in both
+  languages plus descriptions; chips and categories still to come.
 - **Order builder** — Tap dishes into a list; running total in both currencies and
   approximate calories for the table.
 - **Show-to-waiter** — Full-screen original-language names with quantities, in big

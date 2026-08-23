@@ -21,6 +21,7 @@ import { TableOrder } from "@/src/components/menu/table-order";
 import { ReadingView } from "@/src/components/scan/reading-view";
 import { takeScanHandoff } from "@/src/lib/scan-handoff";
 import { recordRecent } from "@/src/lib/recent-menus";
+import { dishMatches } from "@/src/lib/dish-search";
 
 type ImageState =
   | { status: "idle" | "queued" | "loading" | "error"; url: null }
@@ -54,6 +55,8 @@ const MenuScreen = ({
   );
   const [scanMoreOpen, setScanMoreOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [detailName, setDetailName] = useState<string | null>(null);
   const [order, setOrder] = useState<Record<string, number>>(() =>
     toOrderMap(initialOrder),
@@ -142,6 +145,13 @@ const MenuScreen = ({
   const retryImage = (name: string) => {
     setImage(name, { status: "idle", url: null });
     requestImage(name);
+  };
+
+  const toggleSearch = () => {
+    if (searchOpen) {
+      setQuery("");
+    }
+    setSearchOpen(!searchOpen);
   };
 
   const pollInfoRef = useRef<(names: string[], tries: number) => void>(() => {});
@@ -284,15 +294,17 @@ const MenuScreen = ({
   };
 
   // A dish appears once it has substance (photo or facts); once info settles,
-  // everything shows so nothing can stay hidden forever.
-  const visibleDishes = dishes.filter(
+  // everything shows so nothing can stay hidden forever. Search filters after
+  // the reveal gate: holding and the loading row key on the pre-search list.
+  const revealed = dishes.filter(
     (dish) =>
       infoSettled ||
       images[dish.name]?.status === "done" ||
       dish.calories !== null ||
       dish.description !== null,
   );
-  const holding = visibleDishes.length === 0 && dishes.length > 0;
+  const holding = revealed.length === 0 && dishes.length > 0;
+  const visibleDishes = revealed.filter((dish) => dishMatches(query, dish));
 
   return (
     <main
@@ -303,53 +315,108 @@ const MenuScreen = ({
       }
     >
       {holding ? null : (
-        <header className="animate-fade sticky top-0 z-30 -mx-4 mb-4 flex items-center justify-between gap-3 bg-background px-4 py-3">
-          <Link href="/" className="text-xl font-bold tracking-tight">
-            Cart<span className="text-brass">aly</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setShareOpen(true)}
-              aria-label="Share"
-              className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
-            >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+        <header className="animate-fade sticky top-0 z-30 -mx-4 mb-4 bg-background px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <Link href="/" className="text-xl font-bold tracking-tight">
+              Cart<span className="text-brass">aly</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleSearch}
+                aria-label="Search"
+                className={
+                  searchOpen
+                    ? "flex size-9 items-center justify-center rounded-full border border-accent bg-accent text-white"
+                    : "flex size-9 items-center justify-center rounded-full border border-line bg-surface"
+                }
               >
-                <path d="M10 12.5V2.5" />
-                <path d="M6.5 5.5 10 2l3.5 3.5" />
-                <path d="M6.5 8.5h-2A1.5 1.5 0 0 0 3 10v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 17 16v-6a1.5 1.5 0 0 0-1.5-1.5h-2" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => setScanMoreOpen((open) => !open)}
-              aria-label="Add photos"
-              className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
-            >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.9"
-                strokeLinecap="round"
-                aria-hidden="true"
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="9" cy="9" r="5.5" />
+                  <path d="m13.2 13.2 3.8 3.8" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShareOpen(true)}
+                aria-label="Share"
+                className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
               >
-                <path d="M10 3.5v13M3.5 10h13" />
-              </svg>
-            </button>
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 12.5V2.5" />
+                  <path d="M6.5 5.5 10 2l3.5 3.5" />
+                  <path d="M6.5 8.5h-2A1.5 1.5 0 0 0 3 10v6a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 17 16v-6a1.5 1.5 0 0 0-1.5-1.5h-2" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setScanMoreOpen((open) => !open)}
+                aria-label="Add photos"
+                className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
+              >
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 3.5v13M3.5 10h13" />
+                </svg>
+              </button>
+            </div>
           </div>
+          {searchOpen && (
+            <div className="relative mt-2.5">
+              <input
+                type="text"
+                enterKeyHint="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.currentTarget.blur();
+                  }
+                }}
+                autoFocus
+                placeholder="Search dishes"
+                aria-label="Search dishes"
+                className="w-full rounded-full border border-line bg-surface py-2 pr-10 pl-4 text-sm outline-none"
+              />
+              {query !== "" && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className="absolute inset-y-0 right-1.5 flex w-8 items-center justify-center text-muted-fg"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          )}
         </header>
       )}
 
@@ -412,10 +479,26 @@ const MenuScreen = ({
                 </div>
               );
             });
+            if (visible.length === 0 && query.trim() !== "") {
+              return (
+                <div className="animate-fade flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
+                  <p className="text-sm text-muted-fg">
+                    No dishes match “{query.trim()}”
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    className="text-sm font-semibold text-accent"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              );
+            }
             return (
               <>
                 {rendered}
-                {visible.length < dishes.length && (
+                {revealed.length < dishes.length && (
                   <div className="flex items-center justify-center gap-2.5 py-8 text-xs text-muted-fg">
                     <div
                       className="size-4 animate-spin rounded-full border-2 border-line border-t-accent"
