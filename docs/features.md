@@ -23,7 +23,9 @@ Technical design: [SPEC.md](./SPEC.md) · Product overview:
   fuzzy range (~350 kcal), never false precision. Hideable for anyone who'd rather
   not see it.
 - **Filters & search** — Vegetarian / vegan / gluten-free / spicy chips, spice-level
-  dots, category sections, and search across both languages.
+  dots, category sections, and search across both languages. Search shipped
+  first: diacritic-insensitive ("pho" finds "Phở"), matching names in both
+  languages plus descriptions; chips and categories still to come.
 - **Order builder** — Tap dishes into a list; running total in both currencies and
   approximate calories for the table.
 - **Show-to-waiter** — Full-screen original-language names with quantities, in big
@@ -50,7 +52,9 @@ Technical design: [SPEC.md](./SPEC.md) · Product overview:
 - **Multi-photo menus** — Real menus are 2–6 pages; snap them all, get one merged
   menu.
 - **Trip food diary** — Scanned menus become history: "that incredible thing we ate
-  in Osaka," findable later with its picture and real name.
+  in Osaka," findable later with its picture and real name. First cut shipped: a
+  device-local "Recent menus" list on the home screen — every menu you scan or
+  open is remembered on the phone, saved as "Untitled" until you rename it.
 - **Offline for opened menus** — Menus you've already scanned keep working with no
   signal.
 
