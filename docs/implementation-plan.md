@@ -61,6 +61,15 @@ photos via `POST /api/menus/[id]/photos`; max 50 photos per menu. Re-scanning a
 known photo creates a fresh menu referencing the cached photo — menu identity
 stays private to the scanner, convergence happens via the share link.
 
+## Recent menus (2026-08-23)
+
+First cut of the trip food diary, entirely client-side. Every menu-screen
+mount records `{menuId, title, at}` to localStorage (`cartaly:recent-menus`,
+newest first, cap 20) — own scans and shared links alike. The home screen
+lists the entries under the photo picker; new menus save as "Untitled" and a
+pencil icon renames them in place. No server state: `/m/[id]` links are
+already permanent.
+
 ## Phase 3 — Menu UX
 
 - Filters (vegetarian / vegan / gluten-free / spicy), search across both

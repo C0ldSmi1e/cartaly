@@ -50,7 +50,9 @@ Technical design: [SPEC.md](./SPEC.md) · Product overview:
 - **Multi-photo menus** — Real menus are 2–6 pages; snap them all, get one merged
   menu.
 - **Trip food diary** — Scanned menus become history: "that incredible thing we ate
-  in Osaka," findable later with its picture and real name.
+  in Osaka," findable later with its picture and real name. First cut shipped: a
+  device-local "Recent menus" list on the home screen — every menu you scan or
+  open is remembered on the phone, saved as "Untitled" until you rename it.
 - **Offline for opened menus** — Menus you've already scanned keep working with no
   signal.
 

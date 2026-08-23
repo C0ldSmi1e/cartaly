@@ -9,6 +9,7 @@ import { buildPhotoForm } from "@/src/lib/image";
 import { setScanHandoff } from "@/src/lib/scan-handoff";
 import { PhotoPicker } from "@/src/components/scan/photo-picker";
 import { ReadingView } from "@/src/components/scan/reading-view";
+import { RecentMenus } from "@/src/components/scan/recent-menus";
 
 type Parsing = { count: number; photoUrl: string; stage: number };
 
@@ -71,6 +72,7 @@ const ScanScreen = () => {
               onSubmit={scan}
             />
           </div>
+          <RecentMenus />
         </>
       )}
       <p className="fixed inset-x-0 bottom-4 px-6 text-center text-xs text-muted-fg/60">

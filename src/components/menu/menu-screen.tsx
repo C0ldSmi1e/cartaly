@@ -20,6 +20,7 @@ import { ShareModal } from "@/src/components/menu/share-modal";
 import { TableOrder } from "@/src/components/menu/table-order";
 import { ReadingView } from "@/src/components/scan/reading-view";
 import { takeScanHandoff } from "@/src/lib/scan-handoff";
+import { recordRecent } from "@/src/lib/recent-menus";
 
 type ImageState =
   | { status: "idle" | "queued" | "loading" | "error"; url: null }
@@ -64,6 +65,11 @@ const MenuScreen = ({
   );
   const [holdPhotoUrl, setHoldPhotoUrl] = useState<string | null>(null);
   const holdUrlRef = useRef<string | null>(null);
+
+  // Runs for own scans and shared links alike, so tablemates keep the menu too.
+  useEffect(() => {
+    recordRecent(menuId);
+  }, [menuId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
