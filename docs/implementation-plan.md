@@ -65,7 +65,7 @@ stays private to the scanner, convergence happens via the share link.
 
 First cut of the trip food diary, entirely client-side. Every menu-screen
 mount records `{menuId, title, at}` to localStorage (`cartaly:recent-menus`,
-newest first, cap 20) — own scans and shared links alike. The home screen
+newest first, cap 10) — own scans and shared links alike. The home screen
 lists the entries under the photo picker; new menus save as "Untitled" and a
 pencil icon renames them in place. No server state: `/m/[id]` links are
 already permanent.

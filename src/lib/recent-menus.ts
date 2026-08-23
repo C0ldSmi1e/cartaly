@@ -1,7 +1,7 @@
 // Device-local "recent menus" history. No server state: menus already live
 // forever behind /m/[id], so the device only remembers which ones it has seen.
 const STORAGE_KEY = "cartaly:recent-menus";
-const MAX_RECENTS = 20;
+const MAX_RECENTS = 10;
 const DEFAULT_TITLE = "Untitled";
 
 type RecentMenu = { menuId: string; title: string; at: number };

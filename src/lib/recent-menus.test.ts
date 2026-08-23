@@ -27,14 +27,14 @@ describe("upsertRecent", () => {
     expect(list).toEqual([entry("b", "Bangkok", 3), entry("a", "Osaka", 1)]);
   });
 
-  test("caps the list at 20", () => {
+  test("caps the list at 10", () => {
     let list: RecentMenu[] = [];
     for (let i = 0; i < 25; i++) {
       list = upsertRecent(list, `menu-${i}`, i);
     }
-    expect(list).toHaveLength(20);
+    expect(list).toHaveLength(10);
     expect(list[0].menuId).toBe("menu-24");
-    expect(list[19].menuId).toBe("menu-5");
+    expect(list[9].menuId).toBe("menu-15");
   });
 });
 
