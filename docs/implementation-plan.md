@@ -72,8 +72,8 @@ already permanent.
 
 ## Menu search (2026-08-23)
 
-Client-side only: a magnifier in the menu header opens a query box that
-filters the loaded dish list as you type — matching English name, original
+Client-side only: a persistent search field under the menu header's logo
+row filters the loaded dish list as you type — matching English name, original
 name, and description, case- and diacritic-insensitively ("pho" finds
 "Phở"; folding is search-only, never the cache identity). The reveal gate
 and the loading row key on the pre-search list, so a fruitless query shows

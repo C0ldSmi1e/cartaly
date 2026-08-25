@@ -55,7 +55,6 @@ const MenuScreen = ({
   );
   const [scanMoreOpen, setScanMoreOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [detailName, setDetailName] = useState<string | null>(null);
   const [order, setOrder] = useState<Record<string, number>>(() =>
@@ -145,13 +144,6 @@ const MenuScreen = ({
   const retryImage = (name: string) => {
     setImage(name, { status: "idle", url: null });
     requestImage(name);
-  };
-
-  const toggleSearch = () => {
-    if (searchOpen) {
-      setQuery("");
-    }
-    setSearchOpen(!searchOpen);
   };
 
   const pollInfoRef = useRef<(names: string[], tries: number) => void>(() => {});
@@ -323,30 +315,6 @@ const MenuScreen = ({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={toggleSearch}
-                aria-label="Search"
-                className={
-                  searchOpen
-                    ? "flex size-9 items-center justify-center rounded-full border border-accent bg-accent text-white"
-                    : "flex size-9 items-center justify-center rounded-full border border-line bg-surface"
-                }
-              >
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="9" cy="9" r="5.5" />
-                  <path d="m13.2 13.2 3.8 3.8" />
-                </svg>
-              </button>
-              <button
-                type="button"
                 onClick={() => setShareOpen(true)}
                 aria-label="Share"
                 className="flex size-9 items-center justify-center rounded-full border border-line bg-surface"
@@ -388,35 +356,46 @@ const MenuScreen = ({
               </button>
             </div>
           </div>
-          {searchOpen && (
-            <div className="relative mt-2.5">
-              <input
-                type="text"
-                enterKeyHint="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.currentTarget.blur();
-                  }
-                }}
-                autoFocus
-                placeholder="Search dishes"
-                aria-label="Search dishes"
-                className="w-full rounded-full border border-line bg-surface py-2 pr-10 pl-4 text-sm outline-none"
-              />
-              {query !== "" && (
-                <button
-                  type="button"
-                  onClick={() => setQuery("")}
-                  aria-label="Clear search"
-                  className="absolute inset-y-0 right-1.5 flex w-8 items-center justify-center text-muted-fg"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          )}
+          <div className="relative mt-2.5">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted-fg"
+            >
+              <circle cx="9" cy="9" r="5.5" />
+              <path d="m13.2 13.2 3.8 3.8" />
+            </svg>
+            <input
+              type="text"
+              enterKeyHint="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.currentTarget.blur();
+                }
+              }}
+              placeholder="Search…"
+              aria-label="Search dishes"
+              className="w-full rounded-full border border-line bg-surface py-2 pr-10 pl-10 text-sm outline-none"
+            />
+            {query !== "" && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute inset-y-0 right-1.5 flex w-8 items-center justify-center text-muted-fg"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </header>
       )}
 
