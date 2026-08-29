@@ -29,9 +29,10 @@ const resolve = (): { adapter: ImageAdapter; model: string } => {
 };
 
 const buildImagePrompt = (name: string): string =>
-  `Overhead photo of a single serving of "${name}" on a simple ceramic plate, ` +
-  "soft natural light, realistic everyday restaurant presentation — appetizing " +
-  "but honest, not glamorized. No text.";
+  `Overhead photo of a single serving of "${name}", served in the vessel it ` +
+  "typically comes in at a restaurant — plate, bowl, cup, or glass, whichever " +
+  "fits the dish. Simple ceramic serveware, soft natural light, realistic " +
+  "everyday restaurant presentation — appetizing but honest, not glamorized. No text.";
 
 const generateDishImage = async ({ name }: { name: string }): Promise<Buffer> => {
   const { adapter, model } = resolve();
