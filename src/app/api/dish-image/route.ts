@@ -6,7 +6,6 @@ import {
 } from "@/src/server/create-response";
 import { getDishImage } from "@/src/server/actions/dish-image";
 import { enforceRateLimit, getClientIp } from "@/src/server/rate-limit";
-import { readJson } from "@/src/server/request-json";
 import { rateLimits } from "@/src/config/constants";
 import { BadRequestError } from "@/src/server/errors";
 
@@ -21,7 +20,13 @@ const POST = async (request: NextRequest) => {
       ip: getClientIp(request),
       limit: rateLimits.imagesPerHour,
     });
-    const body = bodySchema.safeParse(await readJson(request));
+    let rawJson: unknown;
+    try {
+      rawJson = await request.json();
+    } catch {
+      rawJson = null;
+    }
+    const body = bodySchema.safeParse(rawJson);
     if (!body.success) {
       throw new BadRequestError("Expected { name }");
     }
