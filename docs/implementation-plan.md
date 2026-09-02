@@ -79,6 +79,20 @@ name, and description, case- and diacritic-insensitively ("pho" finds
 and the loading row key on the pre-search list, so a fruitless query shows
 a "no dishes match" state instead of the holding screen.
 
+## Dish detail sheet (2026-09-01)
+
+Tapping a dish now earns its sheet: ingredients, taste, origin, and how
+locals eat it, written simply enough for a five-year-old (the voice lives in
+the `src/server/ai/detail.ts` prompt; drinks count too). Generated on demand
+the first time anyone opens that dish — synchronously behind skeletons
+(~2–4 s), single-flight so a shared table tapping the same dish can't
+double-spend — then cached globally in the `details` table (PK `name_hash`,
+JSON blob + `detailVersion`; bumping the version in constants regenerates
+stale rows lazily; a `lang` key arrives with the language picker). Gated like
+images by the `dishes` row (403 otherwise), rate-limit scope `detail`. An
+unrecognized item comes back all-null and the sheet says so quietly instead
+of guessing.
+
 ## Phase 3 — Menu UX
 
 - Filters (vegetarian / vegan / gluten-free / spicy), search across both

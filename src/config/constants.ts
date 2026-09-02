@@ -17,7 +17,15 @@ export const rateLimits = {
   photosPerHour: 50,
   imagesPerHour: 100,
   infoPerHour: 200,
+  detailsPerHour: 200,
 };
 
 // Version prefix for R2 image keys. Bump when the image prompt changes.
 export const imageCacheVersion = "v1";
+
+// Stored on details rows. Bump when the detail prompt changes (content, tone);
+// stale rows regenerate lazily on their next read.
+export const detailVersion = 1;
+
+// Cap on ingredients kept from a generated dish detail.
+export const maxDetailIngredients = 10;

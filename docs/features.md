@@ -48,6 +48,9 @@ Technical design: [SPEC.md](./SPEC.md) · Product overview:
   cilantro") annotate dishes instead of hiding them.
 - **Dish detail sheet** — Ingredients, origin, taste, how locals eat it. Generated
   on demand — perfect for the wait after ordering — and cached per language.
+  First cut shipped: all four sections, written simply enough for a
+  five-year-old, generated once per dish on first open and cached for
+  everyone; per-language versions still to come.
 - **Pronunciation help** — Romanization plus tap-to-hear, for ordering out loud.
 - **Multi-photo menus** — Real menus are 2–6 pages; snap them all, get one merged
   menu.

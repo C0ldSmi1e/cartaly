@@ -15,6 +15,13 @@
       "when": 1787264653326,
       "tag": "0001_low_the_initiative",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788317937363,
+      "tag": "0002_deep_johnny_storm",
+      "breakpoints": true
     }
   ]
 }

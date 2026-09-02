@@ -44,6 +44,19 @@ const dishes = sqliteTable("dishes", {
     .$defaultFn(() => new Date()),
 });
 
+// Dish detail sheet content: one generated blob per dish, shared globally.
+// `version` mirrors detailVersion in config; stale rows regenerate lazily.
+const details = sqliteTable("details", {
+  nameHash: text("name_hash")
+    .primaryKey()
+    .references(() => dishes.nameHash),
+  detailJson: text("detail_json").notNull(), // DishDetail as JSON
+  version: integer("version").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 // One communal order per menu; anyone with the link can edit.
 const orderItems = sqliteTable(
   "order_items",
@@ -66,4 +79,4 @@ const rateLimits = sqliteTable("rate_limits", {
   resetAt: integer("reset_at").notNull(), // epoch ms when the window resets
 });
 
-export { menus, photos, menuPhotos, dishes, orderItems, rateLimits };
+export { menus, photos, menuPhotos, dishes, details, orderItems, rateLimits };

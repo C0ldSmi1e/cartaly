@@ -31,6 +31,23 @@ const DishInfoResultSchema = z.object({
   pending: z.array(z.string()),
 });
 
+// POST /api/dish-detail result: the "wait after ordering" facts for one dish,
+// written simply enough for a five-year-old. Generated on demand, cached
+// globally per dish (details table). Nulls mark fields the model couldn't
+// answer honestly.
+const DishDetailSchema = z.object({
+  ingredients: z.array(z.string()),
+  taste: z.string().nullable(),
+  origin: z.string().nullable(),
+  howToEat: z.string().nullable(),
+});
+
+const DishDetailResultSchema = z.object({
+  name: z.string(),
+  detail: DishDetailSchema,
+  cached: z.boolean(),
+});
+
 // Response-side dish: parsed names joined with whatever the global dishes
 // table already knows. Nulls mark facts not computed yet.
 const MenuDishSchema = z.object({
@@ -63,6 +80,8 @@ type MenuDish = z.infer<typeof MenuDishSchema>;
 type MenuView = z.infer<typeof MenuViewSchema>;
 type ParseMenuResult = z.infer<typeof ParseMenuResultSchema>;
 type DishInfoResult = z.infer<typeof DishInfoResultSchema>;
+type DishDetail = z.infer<typeof DishDetailSchema>;
+type DishDetailResult = z.infer<typeof DishDetailResultSchema>;
 type OrderResult = z.infer<typeof OrderResultSchema>;
 
 export {
@@ -72,6 +91,8 @@ export {
   MenuViewSchema,
   ParseMenuResultSchema,
   DishInfoResultSchema,
+  DishDetailSchema,
+  DishDetailResultSchema,
   OrderResultSchema,
 };
 export type {
@@ -81,5 +102,7 @@ export type {
   MenuView,
   ParseMenuResult,
   DishInfoResult,
+  DishDetail,
+  DishDetailResult,
   OrderResult,
 };
