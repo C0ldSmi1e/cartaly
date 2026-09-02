@@ -27,6 +27,13 @@ const sanitizeDishDetail = (raw: DishDetail): DishDetail => {
   };
 };
 
+// True when the model recognized nothing — the "never guess" outcome.
+const isEmptyDishDetail = (detail: DishDetail): boolean =>
+  detail.ingredients.length === 0 &&
+  detail.taste === null &&
+  detail.origin === null &&
+  detail.howToEat === null;
+
 // A stored row that no longer parses (corrupt or legacy shape) reads as a
 // cache miss, so the action regenerates instead of serving junk.
 const parseStoredDetail = (json: string): DishDetail | null => {
@@ -38,4 +45,4 @@ const parseStoredDetail = (json: string): DishDetail | null => {
   }
 };
 
-export { sanitizeDishDetail, parseStoredDetail };
+export { sanitizeDishDetail, parseStoredDetail, isEmptyDishDetail };

@@ -3,7 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/src/server/db";
 import { dishes, details } from "@/src/server/db/schema";
 import { generateDishDetail } from "@/src/server/ai/detail";
-import { parseStoredDetail } from "@/src/server/detail-content";
+import { parseStoredDetail, isEmptyDishDetail } from "@/src/server/detail-content";
 import { dishNameHash } from "@/src/server/hash";
 import { detailVersion } from "@/src/config/constants";
 import { AuthorizationError } from "@/src/server/errors";
@@ -43,18 +43,22 @@ const getDishDetail = async ({
   if (!pending) {
     pending = generateDishDetail({ name: dish.name })
       .then((detail) => {
-        // Upsert (not ignore) so a version bump overwrites the stale row.
-        db.insert(details)
-          .values({
-            nameHash,
-            detailJson: JSON.stringify(detail),
-            version: detailVersion,
-          })
-          .onConflictDoUpdate({
-            target: details.nameHash,
-            set: { detailJson: JSON.stringify(detail), version: detailVersion },
-          })
-          .run();
+        // An all-empty detail (nothing recognized) is served but never cached,
+        // so the next open retries instead of pinning the blank forever.
+        if (!isEmptyDishDetail(detail)) {
+          // Upsert (not ignore) so a version bump overwrites the stale row.
+          db.insert(details)
+            .values({
+              nameHash,
+              detailJson: JSON.stringify(detail),
+              version: detailVersion,
+            })
+            .onConflictDoUpdate({
+              target: details.nameHash,
+              set: { detailJson: JSON.stringify(detail), version: detailVersion },
+            })
+            .run();
+        }
         return detail;
       })
       .finally(() => inFlight.delete(nameHash));

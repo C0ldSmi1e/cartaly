@@ -91,7 +91,8 @@ JSON blob + `detailVersion`; bumping the version in constants regenerates
 stale rows lazily; a `lang` key arrives with the language picker). Gated like
 images by the `dishes` row (403 otherwise), rate-limit scope `detail`. An
 unrecognized item comes back all-null and the sheet says so quietly instead
-of guessing.
+of guessing; empty results are served but never cached, so the next open
+retries them.
 
 ## Phase 3 — Menu UX
 

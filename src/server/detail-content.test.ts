@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { sanitizeDishDetail, parseStoredDetail } from "@/src/server/detail-content";
+import {
+  sanitizeDishDetail,
+  parseStoredDetail,
+  isEmptyDishDetail,
+} from "@/src/server/detail-content";
 import { maxDetailIngredients } from "@/src/config/constants";
 
 describe("sanitizeDishDetail", () => {
@@ -49,6 +53,16 @@ describe("sanitizeDishDetail", () => {
       origin: null,
       howToEat: null,
     });
+  });
+});
+
+describe("isEmptyDishDetail", () => {
+  test("true only when nothing was recognized", () => {
+    const empty = { ingredients: [], taste: null, origin: null, howToEat: null };
+    expect(isEmptyDishDetail(empty)).toBe(true);
+    expect(isEmptyDishDetail({ ...empty, ingredients: ["Rice"] })).toBe(false);
+    expect(isEmptyDishDetail({ ...empty, taste: "Sweet." })).toBe(false);
+    expect(isEmptyDishDetail({ ...empty, howToEat: "With a spoon." })).toBe(false);
   });
 });
 
