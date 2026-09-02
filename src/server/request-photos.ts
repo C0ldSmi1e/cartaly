@@ -5,9 +5,12 @@ import { BadRequestError } from "@/src/server/errors";
 
 // Reads 1..maxPhotosPerRequest "photo" files from a multipart request.
 const readPhotos = async (request: NextRequest): Promise<Uint8Array[]> => {
-  const form = await request.formData().catch(() => {
+  let form: FormData;
+  try {
+    form = await request.formData();
+  } catch {
     throw new BadRequestError("Expected multipart form data with photo files");
-  });
+  }
 
   const files = form.getAll("photo").filter((entry) => entry instanceof File);
   if (files.length === 0) {

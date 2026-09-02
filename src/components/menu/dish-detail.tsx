@@ -78,12 +78,13 @@ const DishDetail = ({
       return;
     }
     let cancelled = false;
-    fetch("/api/dish-detail", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: dish.name }),
-    })
-      .then(async (res) => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/dish-detail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: dish.name }),
+        });
         const body = (await res.json()) as StandardResponse<DishDetailResult>;
         if (!res.ok || body.error !== null || body.data === null) {
           throw new Error(body.error ?? "failed");
@@ -92,12 +93,13 @@ const DishDetail = ({
         if (!cancelled) {
           setState({ status: "done", detail: body.data.detail });
         }
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) {
           setState({ status: "error" });
         }
-      });
+      }
+    };
+    void load();
     return () => {
       cancelled = true;
     };

@@ -5,6 +5,7 @@ import {
   errorToResponse,
 } from "@/src/server/create-response";
 import { getOrder, bumpOrder } from "@/src/server/actions/order";
+import { readJson } from "@/src/server/request-json";
 import { BadRequestError } from "@/src/server/errors";
 
 const ID_RE = /^[0-9A-Za-z]{8,20}$/;
@@ -42,7 +43,7 @@ const POST = async (
 ) => {
   try {
     const id = await readId(ctx);
-    const body = bodySchema.safeParse(await request.json().catch(() => null));
+    const body = bodySchema.safeParse(await readJson(request));
     if (!body.success) {
       throw new BadRequestError("Expected { name, delta: 1 | -1 }");
     }

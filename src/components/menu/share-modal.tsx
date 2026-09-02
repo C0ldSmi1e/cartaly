@@ -10,13 +10,20 @@ const ShareModal = ({ onClose }: { onClose: () => void }) => {
   const url = window.location.href;
 
   useEffect(() => {
-    QRCode.toDataURL(url, {
-      width: 480,
-      margin: 1,
-      color: { dark: "#22261fff", light: "#ffffffff" },
-    })
-      .then(setQrDataUrl)
-      .catch(() => setQrDataUrl(null));
+    const render = async () => {
+      try {
+        setQrDataUrl(
+          await QRCode.toDataURL(url, {
+            width: 480,
+            margin: 1,
+            color: { dark: "#22261fff", light: "#ffffffff" },
+          }),
+        );
+      } catch {
+        setQrDataUrl(null);
+      }
+    };
+    void render();
   }, [url]);
 
   const copyLink = async () => {

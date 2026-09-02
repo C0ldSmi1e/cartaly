@@ -41,27 +41,33 @@ const getDishDetail = async ({
 
   let pending = inFlight.get(nameHash);
   if (!pending) {
-    pending = generateDishDetail({ name: dish.name })
-      .then((detail) => {
+    pending = (async () => {
+      try {
+        const generated = await generateDishDetail({ name: dish.name });
         // An all-empty detail (nothing recognized) is served but never cached,
         // so the next open retries instead of pinning the blank forever.
-        if (!isEmptyDishDetail(detail)) {
+        if (!isEmptyDishDetail(generated)) {
           // Upsert (not ignore) so a version bump overwrites the stale row.
           db.insert(details)
             .values({
               nameHash,
-              detailJson: JSON.stringify(detail),
+              detailJson: JSON.stringify(generated),
               version: detailVersion,
             })
             .onConflictDoUpdate({
               target: details.nameHash,
-              set: { detailJson: JSON.stringify(detail), version: detailVersion },
+              set: {
+                detailJson: JSON.stringify(generated),
+                version: detailVersion,
+              },
             })
             .run();
         }
-        return detail;
-      })
-      .finally(() => inFlight.delete(nameHash));
+        return generated;
+      } finally {
+        inFlight.delete(nameHash);
+      }
+    })();
     inFlight.set(nameHash, pending);
   }
   const detail = await pending;

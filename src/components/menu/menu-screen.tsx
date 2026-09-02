@@ -98,30 +98,35 @@ const MenuScreen = ({
   const setImage = (name: string, state: ImageState) =>
     setImages((prev) => ({ ...prev, [name]: state }));
 
+  // Fired without await — pump keeps up to MAX_IN_FLIGHT of these running.
+  const loadImage = useCallback(async (name: string) => {
+    try {
+      const res = await fetch("/api/dish-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const body = (await res.json()) as StandardResponse<{ url: string }>;
+      if (!res.ok || body.error !== null || body.data === null) {
+        throw new Error(body.error ?? "failed");
+      }
+      setImage(name, { status: "done", url: body.data.url });
+    } catch {
+      setImage(name, { status: "error", url: null });
+    } finally {
+      activeRef.current -= 1;
+      pumpRef.current();
+    }
+  }, []);
+
   const pump = useCallback(() => {
     while (activeRef.current < MAX_IN_FLIGHT && queueRef.current.length > 0) {
       const name = queueRef.current.shift()!;
       activeRef.current += 1;
       setImage(name, { status: "loading", url: null });
-      fetch("/api/dish-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      })
-        .then(async (res) => {
-          const body = (await res.json()) as StandardResponse<{ url: string }>;
-          if (!res.ok || body.error !== null || body.data === null) {
-            throw new Error(body.error ?? "failed");
-          }
-          setImage(name, { status: "done", url: body.data.url });
-        })
-        .catch(() => setImage(name, { status: "error", url: null }))
-        .finally(() => {
-          activeRef.current -= 1;
-          pumpRef.current();
-        });
+      void loadImage(name);
     }
-  }, []);
+  }, [loadImage]);
 
   useEffect(() => {
     pumpRef.current = pump;
@@ -218,39 +223,43 @@ const MenuScreen = ({
         }
         return next;
       });
-      fetch(`/api/menus/${menuId}/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, delta }),
-      })
-        .then(async (res) => {
+      const push = async () => {
+        try {
+          const res = await fetch(`/api/menus/${menuId}/order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, delta }),
+          });
           const body = (await res.json()) as StandardResponse<OrderResult>;
           if (res.ok && body.data !== null) {
             setOrder(toOrderMap(body.data));
           }
-        })
-        .catch(() => {
+        } catch {
           // poll reconciles on the next tick
-        });
+        }
+      };
+      void push();
     },
     [menuId],
   );
 
   useEffect(() => {
+    const refresh = async () => {
+      try {
+        const res = await fetch(`/api/menus/${menuId}/order`);
+        const body = (await res.json()) as StandardResponse<OrderResult>;
+        if (res.ok && body.data !== null) {
+          setOrder(toOrderMap(body.data));
+        }
+      } catch {
+        // offline — keep the local view
+      }
+    };
     const timer = setInterval(() => {
       if (document.visibilityState !== "visible") {
         return;
       }
-      fetch(`/api/menus/${menuId}/order`)
-        .then(async (res) => {
-          const body = (await res.json()) as StandardResponse<OrderResult>;
-          if (res.ok && body.data !== null) {
-            setOrder(toOrderMap(body.data));
-          }
-        })
-        .catch(() => {
-          // offline — keep the local view
-        });
+      void refresh();
     }, ORDER_POLL_MS);
     return () => clearInterval(timer);
   }, [menuId]);
