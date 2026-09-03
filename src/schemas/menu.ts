@@ -74,6 +74,9 @@ const OrderResultSchema = z.object({
   items: z.array(z.object({ name: z.string(), qty: z.number() })),
 });
 
+// "clear" drops the dish from the order regardless of quantity.
+const OrderDeltaSchema = z.union([z.literal(1), z.literal(-1), z.literal("clear")]);
+
 type Dish = z.infer<typeof DishSchema>;
 type ParsedPhoto = z.infer<typeof ParsedPhotoSchema>;
 type MenuDish = z.infer<typeof MenuDishSchema>;
@@ -83,6 +86,7 @@ type DishInfoResult = z.infer<typeof DishInfoResultSchema>;
 type DishDetail = z.infer<typeof DishDetailSchema>;
 type DishDetailResult = z.infer<typeof DishDetailResultSchema>;
 type OrderResult = z.infer<typeof OrderResultSchema>;
+type OrderDelta = z.infer<typeof OrderDeltaSchema>;
 
 export {
   DishSchema,
@@ -94,6 +98,7 @@ export {
   DishDetailSchema,
   DishDetailResultSchema,
   OrderResultSchema,
+  OrderDeltaSchema,
 };
 export type {
   Dish,
@@ -105,4 +110,5 @@ export type {
   DishDetail,
   DishDetailResult,
   OrderResult,
+  OrderDelta,
 };

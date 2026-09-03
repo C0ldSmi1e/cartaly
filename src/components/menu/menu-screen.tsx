@@ -8,6 +8,7 @@ import type {
   DishInfoResult,
   ParseMenuResult,
   OrderResult,
+  OrderDelta,
 } from "@/src/schemas/menu";
 import type { StandardResponse } from "@/src/schemas/standard-response";
 import { menuLimits } from "@/src/config/constants";
@@ -212,9 +213,9 @@ const MenuScreen = ({
   }, [initialDishes]);
 
   const bumpOrder = useCallback(
-    (name: string, delta: 1 | -1) => {
+    (name: string, delta: OrderDelta) => {
       setOrder((prev) => {
-        const qty = Math.max(0, (prev[name] ?? 0) + delta);
+        const qty = delta === "clear" ? 0 : Math.max(0, (prev[name] ?? 0) + delta);
         const next = { ...prev };
         if (qty === 0) {
           delete next[name];

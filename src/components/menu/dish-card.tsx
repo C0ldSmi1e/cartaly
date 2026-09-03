@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { MenuDish } from "@/src/schemas/menu";
+import type { MenuDish, OrderDelta } from "@/src/schemas/menu";
 import type { ImageState } from "@/src/components/menu/menu-screen";
+import { TrashIcon } from "@/src/components/menu/trash-icon";
 
 const VIEWPORT_MARGIN = "600px";
 
@@ -20,7 +21,7 @@ const DishCard = ({
   orderQty: number;
   onVisible: (name: string) => void;
   onRetry: (name: string) => void;
-  onBump: (name: string, delta: 1 | -1) => void;
+  onBump: (name: string, delta: OrderDelta) => void;
   onOpen: (name: string) => void;
 }) => {
   const cardRef = useRef<HTMLElement>(null);
@@ -113,6 +114,14 @@ const DishCard = ({
             </button>
           ) : (
             <div className="flex items-center gap-2.5 rounded-full bg-accent px-3 py-1 text-white">
+              <button
+                type="button"
+                onClick={() => onBump(dish.name, "clear")}
+                aria-label={`Remove ${dish.name} from the order`}
+              >
+                <TrashIcon />
+              </button>
+              <span className="h-3.5 w-px bg-white/30" aria-hidden="true" />
               <button
                 type="button"
                 onClick={() => onBump(dish.name, -1)}

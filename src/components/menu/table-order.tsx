@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { MenuDish } from "@/src/schemas/menu";
+import type { MenuDish, OrderDelta } from "@/src/schemas/menu";
+import { TrashIcon } from "@/src/components/menu/trash-icon";
 
 const TableOrder = ({
   order,
@@ -10,7 +11,7 @@ const TableOrder = ({
 }: {
   order: Record<string, number>;
   dishes: MenuDish[];
-  onBump: (name: string, delta: 1 | -1) => void;
+  onBump: (name: string, delta: OrderDelta) => void;
 }) => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [waiterOpen, setWaiterOpen] = useState(false);
@@ -25,10 +26,8 @@ const TableOrder = ({
     dishes.find((dish) => dish.name === name)?.originalName ?? name;
 
   const clearAll = () => {
-    for (const [name, qty] of entries) {
-      for (let i = 0; i < qty; i++) {
-        onBump(name, -1);
-      }
+    for (const [name] of entries) {
+      onBump(name, "clear");
     }
     setSheetOpen(false);
   };
@@ -72,6 +71,15 @@ const TableOrder = ({
                   <p className="truncate text-xs text-accent">{originalOf(name)}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-3 rounded-full bg-background px-3 py-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onBump(name, "clear")}
+                    aria-label={`Remove ${name} from the order`}
+                    className="text-muted-fg"
+                  >
+                    <TrashIcon />
+                  </button>
+                  <span className="h-3.5 w-px bg-line" aria-hidden="true" />
                   <button
                     type="button"
                     onClick={() => onBump(name, -1)}

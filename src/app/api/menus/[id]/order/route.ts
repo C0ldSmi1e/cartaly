@@ -6,12 +6,13 @@ import {
 } from "@/src/server/create-response";
 import { getOrder, bumpOrder } from "@/src/server/actions/order";
 import { BadRequestError } from "@/src/server/errors";
+import { OrderDeltaSchema } from "@/src/schemas/menu";
 
 const ID_RE = /^[0-9A-Za-z]{8,20}$/;
 
 const bodySchema = z.object({
   name: z.string().min(1).max(300),
-  delta: z.union([z.literal(1), z.literal(-1)]),
+  delta: OrderDeltaSchema,
 });
 
 const readId = async (ctx: RouteContext<"/api/menus/[id]/order">) => {
@@ -50,7 +51,7 @@ const POST = async (
     }
     const body = bodySchema.safeParse(rawJson);
     if (!body.success) {
-      throw new BadRequestError("Expected { name, delta: 1 | -1 }");
+      throw new BadRequestError('Expected { name, delta: 1 | -1 | "clear" }');
     }
     const result = bumpOrder({ menuId: id, ...body.data });
     return NextResponse.json(createSuccessResponse({ data: result }), {

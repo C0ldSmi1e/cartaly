@@ -5,8 +5,10 @@ import type {
   DishDetail as DishDetailContent,
   DishDetailResult,
   MenuDish,
+  OrderDelta,
 } from "@/src/schemas/menu";
 import type { StandardResponse } from "@/src/schemas/standard-response";
+import { TrashIcon } from "@/src/components/menu/trash-icon";
 
 type DetailState =
   | { status: "loading" }
@@ -63,7 +65,7 @@ const DishDetail = ({
   dish: MenuDish;
   imageUrl: string | null;
   qty: number;
-  onBump: (name: string, delta: 1 | -1) => void;
+  onBump: (name: string, delta: OrderDelta) => void;
   onClose: () => void;
 }) => {
   const [attempt, setAttempt] = useState(0);
@@ -215,6 +217,14 @@ const DishDetail = ({
           </button>
         ) : (
           <div className="flex items-center justify-center gap-8 rounded-full bg-accent py-3.5 text-white shadow-xl">
+            <button
+              type="button"
+              onClick={() => onBump(dish.name, "clear")}
+              aria-label={`Remove ${dish.name} from the order`}
+            >
+              <TrashIcon size={18} />
+            </button>
+            <span className="h-4 w-px bg-white/30" aria-hidden="true" />
             <button
               type="button"
               onClick={() => onBump(dish.name, -1)}

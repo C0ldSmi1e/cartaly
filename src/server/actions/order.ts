@@ -5,7 +5,7 @@ import { menus, dishes, orderItems } from "@/src/server/db/schema";
 import { deriveMenu } from "@/src/server/menu-view";
 import { dishNameHash } from "@/src/server/hash";
 import { BadRequestError, NotFoundError } from "@/src/server/errors";
-import type { OrderResult } from "@/src/schemas/menu";
+import type { OrderDelta, OrderResult } from "@/src/schemas/menu";
 
 const MAX_QTY = 99;
 
@@ -33,7 +33,7 @@ const bumpOrder = ({
 }: {
   menuId: string;
   name: string;
-  delta: 1 | -1;
+  delta: OrderDelta;
 }): OrderResult => {
   const menu = deriveMenu(menuId);
   if (!menu) {
@@ -51,7 +51,10 @@ const bumpOrder = ({
       .from(orderItems)
       .where(and(eq(orderItems.menuId, menuId), eq(orderItems.nameHash, nameHash)))
       .get();
-    const qty = Math.max(0, Math.min(MAX_QTY, (row?.qty ?? 0) + delta));
+    const qty =
+      delta === "clear"
+        ? 0
+        : Math.max(0, Math.min(MAX_QTY, (row?.qty ?? 0) + delta));
     if (qty === 0) {
       tx.delete(orderItems)
         .where(and(eq(orderItems.menuId, menuId), eq(orderItems.nameHash, nameHash)))
